@@ -1,0 +1,23 @@
+{
+  "name": "cloudFTP",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cloudFTP.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IngenuityEngine/cloudFTP.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IngenuityEngine/cloudFTP/issues"
+  },
+  "homepage": "https://github.com/IngenuityEngine/cloudFTP#readme",
+  "dependencies": {
+    "ftpd": "^0.2",
+    "lodash": "^4.13.1"
+  }
+}

@@ -1,5 +1,7 @@
 
-var config = require('./config/default')
+//var _ = require('lodash')
+
+//var config = require('./config/default')
 
 /*
 Basic server implementation using ftpd node module
@@ -45,9 +47,14 @@ server.on('client:connected', function (connection)
 	console.log('client connected: ' + connection.remoteAddress)
 	connection.on('command:user', function (user, success, failure)
 	{
+
+		/*if (_.includes(config.users, user)
+		{
+
+		}*/
 		if (user)
 		{
-			username = user;
+			username = user
 			success()
 		}
 		else

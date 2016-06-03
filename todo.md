@@ -56,7 +56,7 @@ password: [                ]
 [Submit]
 ```
 
-- [ ] submit the form via post and handle it in express, there's a nice simple example here: http://code.runnable.com/U0sU598vXio2uD-1/example-reading-form-input-with-express-4-0-and-body-parser-for-node-js
+- [ ] submit the form via post and <a href="http://code.runnable.com/U0sU598vXio2uD-1/example-reading-form-input-with-express-4-0-and-body-parser-for-node-js">handle it in express</a>:
 	- [ ] reject incomplete or invalid entries
 	- [ ] make the folder name web safe (arkUtil.makeWebSafe)
 	- [ ] load the config file

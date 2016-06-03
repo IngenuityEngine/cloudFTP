@@ -1,8 +1,8 @@
 ### Phase 1
 
 - [x] ftp should serve a root folder specified via config
-- [ ] top-level subfolders in the root folder should only be visible and accessible via username and password
-- [ ] usernames and passwords for those folders should also be controlled via config, ex:
+- [x] top-level subfolders in the root folder should only be visible and accessible via username and password
+- [x] usernames and passwords for those folders should also be controlled via config, ex:
 
 ```
 	{
@@ -21,9 +21,10 @@
 	}
 ```
 
-- [ ] at startup the ftp should:
-	- [ ] create the top level root directories, if they don't already exist
-	- [ ] add these permissions, however that works
+- [x] at startup the ftp should:
+	- [x] create the top level root directories, if they don't already exist
+	- [x] add these permissions, however that works
+- [ ] testing, style for all of Phase 1
 
 
 ### Phase 2

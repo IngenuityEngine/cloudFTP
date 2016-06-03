@@ -1,22 +1,18 @@
-
-//var _ = require('lodash')
-
-//var config = require('./config/default')
-
 /*
 Basic server implementation using ftpd node module
 */
 
 /*Modules*/
 var ftpd = require('ftpd')
+//var _ = require('lodash')
+var config = require('./config/default')
 
 /*Constants*/
 var server,
 	options =
 	{
-		//Use enviornment vars IP and PORT if they exist, else use defaults
-		host: process.env.IP || '127.0.0.1',
-		port: process.env.PORT || 7002,
+		host: config.basics.host,
+		port: config.basics.port,
 	}
 
 /*Server set up*/
@@ -25,11 +21,20 @@ server = new ftpd.FtpServer(options.host,
 		//No callback, get the initial working directory of the user, relative to the root directory
 		getInitialCwd: function ()
 		{
-			return '/'
+			if (config.basics.root)
+			{
+				console.log(config.basics.root)
+				return config.basics.root
+			}
+			else
+			{
+				return '/'
+			}
 		},
 		//No callback, get root directory for the user
 		getRoot: function ()
 		{
+			//From user's standpoint, this cwd will appear as '/'
 			return process.cwd()
 		},
 	})
@@ -47,7 +52,6 @@ server.on('client:connected', function (connection)
 	console.log('client connected: ' + connection.remoteAddress)
 	connection.on('command:user', function (user, success, failure)
 	{
-
 		/*if (_.includes(config.users, user)
 		{
 

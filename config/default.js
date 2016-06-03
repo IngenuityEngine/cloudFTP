@@ -5,7 +5,7 @@ module.exports = {
 		host: process.env.IP || '127.0.0.1',
 		port: process.env.PORT || 7002,
 		//Must be a subdirectory of where the server is run from
-		root: null
+		root: '/ie/',
 	},
 	users:[
 		{

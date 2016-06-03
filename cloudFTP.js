@@ -23,7 +23,6 @@ server = new ftpd.FtpServer(options.host,
 		{
 			if (config.basics.root)
 			{
-				console.log(config.basics.root)
 				return config.basics.root
 			}
 			else
@@ -35,7 +34,14 @@ server = new ftpd.FtpServer(options.host,
 		getRoot: function ()
 		{
 			//From user's standpoint, this cwd will appear as '/'
-			return process.cwd()
+			if (config.basics.root)
+			{
+				return '/'
+			}
+			else
+			{
+				return process.cwd()
+			}
 		},
 	})
 

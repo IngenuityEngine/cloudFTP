@@ -1,6 +1,6 @@
 ### Phase 1
 
-- [ ] ftp should serve a root folder specified via config
+- [x] ftp should serve a root folder specified via config
 - [ ] top-level subfolders in the root folder should only be visible and accessible via username and password
 - [ ] usernames and passwords for those folders should also be controlled via config, ex:
 

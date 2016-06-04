@@ -72,6 +72,19 @@ server = new ftpd.FtpServer(options.host,
 				return process.cwd()
 			}
 		},
+
+		//TODO: for testing
+		/*getInitialCwd: function (connection) {
+			//return '/';
+			return '/files/'
+		},
+		getRoot: function () {
+			console.log(process.cwd())
+			var path = process.cwd()
+			console.log(path)
+			path += '/files/'
+			return path
+		}*/
 	})
 
 //Handle errors, if any

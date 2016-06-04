@@ -6,6 +6,7 @@ module.exports = {
 		port: process.env.PORT || 7002,
 		//Must be a subdirectory of where the server is run from
 		root: '/ie/cloudFTP/files/', //On instance, include /var/ftp/files
+		//TODO: alternatively, /files
 	},
 	/*users:[
 		{

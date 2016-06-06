@@ -44,7 +44,7 @@ var server = new ftpd.FtpServer(options.host,
 		{
 			userRoot = config.basics.root
 			if (connection.username != 'ingenuity')
-				userRoot += connection.username
+				userRoot += '/' + connection.username
 			//return userRoot
 		}
 		else

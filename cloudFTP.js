@@ -1,4 +1,3 @@
-
 // Basic server implementation using ftpd node module
 
 // Modules
@@ -16,77 +15,75 @@ var options = {
 // Server set up
 var server = new ftpd.FtpServer(options.host,
 {
-	// No callback, get the initial working directory of
+	// No callback, define the initial working directory of
 	// the user, relative to the root directory
-	getInitialCwd: function (connection, callback)
+	getInitialCwd: function ()
 	{
-		// if Root defined in config file, use that, else,
-		// use local cwd
+		var userCWD = '/'
+		return userCWD
+	},
 
-		// TODO: Store return value
+	// Get root directory for the user, with callback
+	// From the user's standpoint, this root path will appear as '/'
+	// User cannot escape this directory
+	getRoot: function (connection, callback)
+	{
+		//Check that username is valid
 		var matchingUser = _.find(config.users,
 			{'username': connection.username})
 		if(!matchingUser)
 		{
 			var err = new Error('Error: Username not found')
 			console.log(err.message)
-			process.exit(1) //exit with failure
+			process.exit(1)
 		}
 
-		//Parse userDir, from config file and username
-		var userDir = config.basics.root
+		//Parse userRoot, from config file and username
+		var userRoot
 		if (config.basics.root)
 		{
+			userRoot = config.basics.root
 			if (connection.username != 'ingenuity')
-				userDir += connection.username
+				userRoot += connection.username
+			//return userRoot
 		}
 		else
 		{
-			userDir = '/'
+			//return process.cwd()
+			userRoot = process.cwd()
 		}
 
-		// If the directory exists, call back immediately
-		// with that directiory
+		// If the subdirectory exists, call back immediately
+		// with the relative path to that directiory
 		// If not, create the directiory and callback
-		// possible error and the directory
-		fs.exists(userDir, function(exists)
+		// possible error and relative path
+		// Default to relative root
+		fs.exists(userRoot, function(exists)
 		{
 			if (exists)
 			{
-				callback(null, userDir)
+				console.log('Entering directory ' + userRoot)
+				callback(null, userRoot)
 			}
 			else
 			{
-				fs.mkdir(userDir, function(err)
+				fs.mkdir(userRoot, function(err)
 				{
-					callback(err, userDir)
+					if (err)
+					{
+						// Default to root
+						console.log('Entering default relative root')
+						callback(null, '/')
+					}
+					else
+					{
+						console.log('Creating and entering ' + userRoot)
+						callback(err, userRoot)
+					}
 				})
 			}
 		})
 	},
-
-	// No callback, get root directory for the user
-	getRoot: function ()
-	{
-		// From user's standpoint, this cwd will appear as '/'
-		if (config.basics.root)
-			return '/'
-		else
-			return process.cwd()
-	},
-
-	// TODO: for testing
-	// getInitialCwd: function (connection) {
-	// 	//return '/'
-	// 	return '/files/'
-	// },
-	// getRoot: function () {
-	// 	console.log(process.cwd())
-	// 	var path = process.cwd()
-	// 	console.log(path)
-	// 	path += '/files/'
-	// 	return path
-	// }
 })
 
 // Handle errors, if any
@@ -113,7 +110,6 @@ server.on('client:connected', function (connection)
 			failure()
 			var err = new Error('Error: Username not found')
 			console.log(err.message)
-			// exit with failure
 			process.exit(1)
 		}
 	})
@@ -143,15 +139,3 @@ server.debugging = 4
 
 server.listen(options.port)
 console.log('Listening on port ' + options.port)
-
-// Helper functions
-
-// Function: userExists
-// Purpose: given a collection and a username, see if username is in that collection
-// Input: collection - collection of objects to search, user -
-// string username to find
-// Output: boolean - true if found, false if not
-// function userExists(collection, field, user)
-// {
-// 	return _.find(collection, {field: user})
-// }

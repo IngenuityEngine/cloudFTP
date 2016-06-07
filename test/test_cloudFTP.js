@@ -23,14 +23,31 @@ describe('server', function()
 		server = require('../cloudFTP.js')
 	})
 
-	/*('should reject invalid password', function (done) {
-		var badPass = options.pass + '_invalid';
+	it ('should reject invalid username', function (done)
+	{
+		var badUser = options.user +  '_sneak'
+		server = require('../cloudFTP.js')
 		client = new jsftpClient(options)
-		client.auth(options.user, badPass, function (error) {
-			console.log('i found error ' + error)
+		client.auth(badUser, options.pass, function (error)
+		{
+			//error.code.should.eql(530)
+			expect(error.code).toBe(530)
 			done()
 		});
-	})*/
+	})
+
+	it ('should reject invalid password', function (done)
+	{
+		var badPass = options.pass + '_wrong';
+		server = require('../cloudFTP.js')
+		client = new jsftpClient(options)
+		client.auth(options.user, badPass, function (error)
+		{
+			//error.code.should.eql(530)
+			expect(error.code).toBe(530)
+			done()
+		});
+	})
 
 	//connecting as admin account (test ls, cd)
 	//connecting as existing user

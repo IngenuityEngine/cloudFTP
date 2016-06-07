@@ -110,7 +110,7 @@ server.on('client:connected', function (connection)
 			failure()
 			var err = new Error('Error: Username not found')
 			console.log(err.message)
-			process.exit(1)
+			//process.exit(1)
 		}
 	})
 
@@ -127,10 +127,10 @@ server.on('client:connected', function (connection)
 		}
 		else
 		{
-			failure()
 			var err = new Error('Error: Incorrect password')
 			console.log(err.message)
-			process.exit(1)
+			failure()
+			//process.exit(1)
 		}
 	})
 })

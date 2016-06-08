@@ -19,7 +19,8 @@ describe('basic', function()
 
 describe('server', function()
 {
-	var cloudFTP, server, client
+	var cloudFTP, client
+
 	// Default options for testing
 	var options = {
 		'host': '127.0.0.1',
@@ -33,10 +34,11 @@ describe('server', function()
 	{
 		done()
 	})
+
 	it ('should reject invalid username', function (done)
 	{
 		var badUser = options.user +  '_sneak'
-		server = cloudFTP.init()
+		cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth(badUser, options.pass, function (error)
 		{
@@ -48,7 +50,7 @@ describe('server', function()
 	it ('should reject invalid password', function (done)
 	{
 		var badPass = options.pass + '_wrong';
-		server = cloudFTP.init()
+		cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth(options.user, badPass, function (error)
 		{
@@ -58,7 +60,7 @@ describe('server', function()
 	})
 	it('should reject no username (anonymous)', function (done)
 	{
-		server = cloudFTP.init()
+		cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth('', options.pass, function (error)
 		{
@@ -68,7 +70,7 @@ describe('server', function()
 	})
 	it('should reject no password (anonymous)', function (done)
 	{
-		server = cloudFTP.init()
+		cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth(options.user, '', function (error)
 		{
@@ -81,7 +83,7 @@ describe('server', function()
 	{
 		// Cleanup
 		client.raw.quit()
-		server.close()
+		cloudFTP.close()
 	})
 
 	//connecting as admin account (test ls, cd)

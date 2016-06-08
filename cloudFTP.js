@@ -1,15 +1,22 @@
 // Basic server implementation using ftpd node module
 
-// Modules
+// Vendor Modules
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
+
+// Our Modules
+var helpers = require('../arkUtil/arkUtil/arkUtil.js')
+
+// Config
 var config = require('./config/default')
 
 // Constants
 var options = {
 		host: config.basics.host,
 		port: config.basics.port,
+		root: config.basics.root,
+		users: config.users,
 	}
 var username = null
 
@@ -35,28 +42,26 @@ var cloudFTP = module.exports =
 			getRoot: function (connection, callback)
 			{
 				//Check that username is valid
-				var matchingUser = _.find(config.users,
+				var matchingUser = _.find(options.users,
 					{'username': connection.username})
 				if(!matchingUser)
 				{
 					var err = new Error('Error: Username not found')
 					console.log(err.message)
-					process.exit(1)
 				}
 
 				//Parse userRoot, from config file and username
 				var userRoot = null
 
-				if (config.basics.root)
+				if (options.root)
 				{
-					userRoot = config.basics.root
+					userRoot = helpers.removeTrailingSlash(options.root)
+					console.log(userRoot)
 					if (connection.username != 'ingenuity')
 						userRoot += '/' + connection.username
-					//return userRoot
 				}
 				else
 				{
-					//return process.cwd()
 					userRoot = process.cwd()
 				}
 
@@ -83,6 +88,8 @@ var cloudFTP = module.exports =
 
 		server.listen(options.port)
 		console.log('Listening on port ' + options.port)
+
+		return server
 	},
 	// Helper functions
 
@@ -109,7 +116,6 @@ var cloudFTP = module.exports =
 					//Default to root
 					console.log('Entering default relative root')
 					callback(err, '/')
-					//TODO: or err?
 				}
 			}
 			else
@@ -129,10 +135,10 @@ var cloudFTP = module.exports =
 	verifyUser: function(user, success, failure)
 	{
 		// If user found in config.users collection, continue
-		if(_.find(config.users, {'username': user}))
+		if(_.find(options.users, {'username': user}))
 		{
 			username = user
-			success()
+			success(username)
 		}
 		else
 		{
@@ -150,7 +156,7 @@ var cloudFTP = module.exports =
 	{
 		// If user has correct corresponding password
 		// in config.users collection, continue
-		var matchingUser = _.find(config.users,
+		var matchingUser = _.find(options.users,
 			{'username':username, 'password':pass})
 
 		if (matchingUser)
@@ -164,6 +170,8 @@ var cloudFTP = module.exports =
 			failure()
 		}
 	}
+// End of module
 }
 
+//Temp
 cloudFTP.init()

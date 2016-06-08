@@ -7,30 +7,39 @@ var it = global.it
 var beforeEach = global.beforeEach
 var afterEach = global. afterEach
 var jsftpClient = require('jsftp')
-var should = require('should')
+
+describe('basic', function()
+{
+	var cloudFTP
+	it ('should load', function()
+	{
+		cloudFTP = require('../cloudFTP.js')
+	})
+})
 
 describe('server', function()
 {
-	var server, client
+	var cloudFTP, server, client
+	// Default options for testing
 	var options = {
 		'host': '127.0.0.1',
 		'port': 7002,
 		'user': 'b99',
 		'pass': 'bourbon'
 	}
-	it ('should load', function()
-	{
-		server = require('../cloudFTP.js')
-	})
+	cloudFTP = require('../cloudFTP.js')
 
+	beforeEach(function(done)
+	{
+		done()
+	})
 	it ('should reject invalid username', function (done)
 	{
 		var badUser = options.user +  '_sneak'
-		server = require('../cloudFTP.js')
+		server = cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth(badUser, options.pass, function (error)
 		{
-			//error.code.should.eql(530)
 			expect(error.code).toBe(530)
 			done()
 		});
@@ -39,14 +48,40 @@ describe('server', function()
 	it ('should reject invalid password', function (done)
 	{
 		var badPass = options.pass + '_wrong';
-		server = require('../cloudFTP.js')
+		server = cloudFTP.init()
 		client = new jsftpClient(options)
 		client.auth(options.user, badPass, function (error)
 		{
-			//error.code.should.eql(530)
 			expect(error.code).toBe(530)
 			done()
 		});
+	})
+	it('should reject no username (anonymous)', function (done)
+	{
+		server = cloudFTP.init()
+		client = new jsftpClient(options)
+		client.auth('', options.pass, function (error)
+		{
+			expect(error.code).toBe(530)
+			done()
+		})
+	})
+	it('should reject no password (anonymous)', function (done)
+	{
+		server = cloudFTP.init()
+		client = new jsftpClient(options)
+		client.auth(options.user, '', function (error)
+		{
+			expect(error.code).toBe(530)
+			done()
+		})
+	})
+
+	afterEach(function()
+	{
+		// Cleanup
+		client.raw.quit()
+		server.close()
 	})
 
 	//connecting as admin account (test ls, cd)
@@ -58,5 +93,6 @@ describe('server', function()
 	//test ls command, cd
 	//connecting with invalid port/address
 	//reject anonymous user
+	//TODO: allow customOptions to override default config file (for testing and use)
 
 })

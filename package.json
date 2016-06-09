@@ -17,12 +17,13 @@
   },
   "homepage": "https://github.com/IngenuityEngine/cloudFTP#readme",
   "dependencies": {
-    "async": "*",
+    "async": "^1.5.2",
     "debug": "^2.2.0",
     "expect": "^1",
-    "ftpd": "^0",
+    "ftpd": "^0.2.15",
     "jsftp": "^1",
     "lodash": "^4",
-    "mocha": "^2"
+    "mocha": "^2.5.3",
+    "uberclass": "^1.0.1"
   }
 }

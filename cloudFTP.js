@@ -4,9 +4,11 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
+// var util = require('util')
 
 // Our Modules
-var helpers = require('../arkUtil/arkUtil/arkUtil.js')
+var helpers = require('../arkUtil/arkUtil/arkUtil')
+var base = require('./base')
 
 // Config
 var config = require('./config/default')
@@ -22,37 +24,59 @@ var username
 	//customOptions
 
 // Main Script
-var cloudFTP = module.exports =
-{
+var cloudFTP = module.exports = base.extend({
+
 init: function(custom)
 {
+	// self used in place of this within callbacks
+	var self = this
+
+	// Bind 'this' to cloudFTP
+	_.bindAll(this, _.functionsIn(this))
+
 	// Override default options with custom options, if they exist
-	cloudFTP.customOptions = custom || {}
-	_.defaults(cloudFTP.customOptions, options)
-	cloudFTP.options = options
+	this.customOptions = custom || {}
+	_.defaults(this.customOptions, options)
+	this.options = options
 
 	// Server set up
-	cloudFTP.server = new ftpd.FtpServer(
-		cloudFTP.customOptions.host, cloudFTP)
+	this.server = new ftpd.FtpServer(
+	this.customOptions.host, {
+		getInitialCwd: function()
+		{
+			self.getInitialCwd()
+		},
+		getRoot: function(connection, callback)
+		{
+			self.getRoot(connection, callback)
+		},
+	})
 
 	// Handle errors, if any
-	cloudFTP.server.on('error', function(error)
+	this.server.on('error', function(error)
 	{
+		self.trigger('error', error)
 		console.log('FTP Server error:', error)
 	})
 
 	// Initiate connection, with authentication
-	cloudFTP.server.on('client:connected', function(connection)
+	this.server.on('client:connected', function(connection)
 	{
 		console.log('client connected: ' + connection.remoteAddress)
-		connection.on('command:user', cloudFTP.verifyUser)
-		connection.on('command:pass', cloudFTP.verifyPass)
+		connection.on('command:user', self.verifyUser)
+		connection.on('command:pass', self.verifyPass)
+
+		// _.each(self.callbacks.onConnect, function(callback)
+		// {
+		// 	callback(connection)
+		// })
 	})
 
-	cloudFTP.server.debugging = 4
+	this.server.debugging = 4
 
-	cloudFTP.server.listen(cloudFTP.customOptions.port)
-	console.log('Listening on port ' + cloudFTP.customOptions.port)
+	this.server.listen(this.customOptions.port)
+
+	console.log('Listening on port ' + this.customOptions.port)
 },
 
 // No callback, define the initial working directory of
@@ -68,8 +92,10 @@ getInitialCwd: function()
 // User cannot escape this directory
 getRoot: function(connection, callback)
 {
+	console.log(typeof callback)
+
 	// Check that username is valid
-	var matchingUser = _.find(cloudFTP.customOptions.users,
+	var matchingUser = _.find(this.customOptions.users,
 		{'username': connection.username})
 	if (!matchingUser)
 	{
@@ -79,13 +105,14 @@ getRoot: function(connection, callback)
 	}
 
 	// Parse userRoot, from config file and username
-	if (!cloudFTP.customOptions.root)
+	if (!this.customOptions.root)
 	{
 		return callback(new Error(
 			'No root directory specified'))
 	}
 
-	var userRoot = helpers.removeTrailingSlash(cloudFTP.customOptions.root)
+	var userRoot = helpers.removeTrailingSlash(this.customOptions.root)
+	// this.customOptions.root = helpers.removeTrailingSlash(this.customOptions.root)
 	if (connection.username != 'ingenuity')
 		userRoot += '/' + connection.username
 
@@ -93,7 +120,8 @@ getRoot: function(connection, callback)
 	console.log('userRoot:', userRoot)
 
 	// Make directory, if it doesn't exist, and enter
-	cloudFTP.makeDirectory(userRoot, callback)
+	// this.makeDirectory(userRoot, callback)
+	this.makeDirectory(userRoot, callback)
 },
 
 // Helper functions
@@ -104,17 +132,17 @@ getRoot: function(connection, callback)
 // Defaults to relative root
 // Inputs: userRoot (path to desired directory), callback
 // Outputs: none
-makeDirectory: function(userRoot, callback)
+makeDirectory: function(root, callback)
 {
-	fs.mkdir(userRoot, function(err)
+	fs.mkdir(root, function(err)
 	{
 		if (err)
 		{
 			if (err.code == 'EEXIST')
 			{
 				// if folder already exists, ignore error
-				console.log('Exists, entering ' + userRoot)
-				return callback(null, userRoot)
+				console.log('Exists, entering ' + root)
+				return callback(null, root)
 			}
 			else
 			{
@@ -126,8 +154,8 @@ makeDirectory: function(userRoot, callback)
 		else
 		{
 			// else folder successfully created
-			console.log('Creating, entering ' + userRoot)
-			return callback(err, userRoot)
+			console.log('Creating, entering ' + root)
+			return callback(err, root)
 		}
 	})
 },
@@ -140,7 +168,7 @@ makeDirectory: function(userRoot, callback)
 verifyUser: function(user, success, failure)
 {
 	// If user found in config.users collection, continue
-	var matchingUser = _.find(cloudFTP.customOptions.users,
+	var matchingUser = _.find(this.customOptions.users,
 		{'username': user})
 
 	if (matchingUser)
@@ -164,7 +192,7 @@ verifyPass: function(pass, success, failure)
 {
 	// If user has correct corresponding password
 	// in config.users collection, continue
-	var matchingUser = _.find(cloudFTP.customOptions.users,
+	var matchingUser = _.find(this.customOptions.users,
 		{'username':username, 'password':pass})
 
 	if (matchingUser)
@@ -177,7 +205,9 @@ verifyPass: function(pass, success, failure)
 		console.log(err.message)
 		failure()
 	}
+
 },
+
 // Function: close
 // Wrapper for server.close()
 // Can be modified for other functionality on close
@@ -185,14 +215,18 @@ verifyPass: function(pass, success, failure)
 // Outputs: none
 close: function()
 {
-	cloudFTP.server.close()
+	// Turn base off, removes all callbacks
+	this.off()
+	this.server.close()
 },
 
 // End of module
-}
+})
 
 // If script is not loaded by another script, run itself
 if (!module.parent)
 {
-	cloudFTP.init()
+	var server
+	server = new cloudFTP()
 }
+

@@ -4,7 +4,6 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
-var util = require('util')
 
 // Our Modules
 var helpers = require('../arkUtil/arkUtil/arkUtil.js')
@@ -19,8 +18,8 @@ var options = {
 		root: config.basics.root,
 		users: config.users,
 	}
-var username,
-	customOptions
+var username
+	//customOptions
 
 // Main Script
 var cloudFTP = module.exports =
@@ -28,26 +27,18 @@ var cloudFTP = module.exports =
 init: function(custom)
 {
 	// Override default options with custom options, if they exist
-	customOptions = custom || {}
-	Object.keys(options).forEach(function(key)
-	{
-		if (!customOptions.hasOwnProperty(key))
-			customOptions[key] = options[key]
-	})
-	console.log('Options ' + util.inspect(options))
-	console.log('Custom Options: ' + util.inspect(customOptions))
+	cloudFTP.customOptions = custom || {}
+	_.defaults(cloudFTP.customOptions, options)
+	cloudFTP.options = options
 
 	// Server set up
 	cloudFTP.server = new ftpd.FtpServer(
-		customOptions.host,
-		cloudFTP)
+		cloudFTP.customOptions.host, cloudFTP)
 
 	// Handle errors, if any
 	cloudFTP.server.on('error', function(error)
 	{
-		//TEMP
-		if (customOptions.host != '127.0.0.1')
-			console.log('FTP Server error:', error)
+		console.log('FTP Server error:', error)
 	})
 
 	// Initiate connection, with authentication
@@ -60,8 +51,8 @@ init: function(custom)
 
 	cloudFTP.server.debugging = 4
 
-	cloudFTP.server.listen(customOptions.port)
-	console.log('Listening on port ' + customOptions.port)
+	cloudFTP.server.listen(cloudFTP.customOptions.port)
+	console.log('Listening on port ' + cloudFTP.customOptions.port)
 },
 
 // No callback, define the initial working directory of
@@ -78,7 +69,7 @@ getInitialCwd: function()
 getRoot: function(connection, callback)
 {
 	// Check that username is valid
-	var matchingUser = _.find(customOptions.users,
+	var matchingUser = _.find(cloudFTP.customOptions.users,
 		{'username': connection.username})
 	if (!matchingUser)
 	{
@@ -88,13 +79,13 @@ getRoot: function(connection, callback)
 	}
 
 	// Parse userRoot, from config file and username
-	if (!customOptions.root)
+	if (!cloudFTP.customOptions.root)
 	{
 		return callback(new Error(
-			'No root directory specified in config'))
+			'No root directory specified'))
 	}
 
-	var userRoot = helpers.removeTrailingSlash(customOptions.root)
+	var userRoot = helpers.removeTrailingSlash(cloudFTP.customOptions.root)
 	if (connection.username != 'ingenuity')
 		userRoot += '/' + connection.username
 
@@ -149,7 +140,7 @@ makeDirectory: function(userRoot, callback)
 verifyUser: function(user, success, failure)
 {
 	// If user found in config.users collection, continue
-	var matchingUser = _.find(customOptions.users,
+	var matchingUser = _.find(cloudFTP.customOptions.users,
 		{'username': user})
 
 	if (matchingUser)
@@ -173,7 +164,7 @@ verifyPass: function(pass, success, failure)
 {
 	// If user has correct corresponding password
 	// in config.users collection, continue
-	var matchingUser = _.find(customOptions.users,
+	var matchingUser = _.find(cloudFTP.customOptions.users,
 		{'username':username, 'password':pass})
 
 	if (matchingUser)

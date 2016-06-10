@@ -4,7 +4,6 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
-// var util = require('util')
 
 // Our Modules
 var helpers = require('../arkUtil/arkUtil/arkUtil')
@@ -35,7 +34,7 @@ init: function(custom)
 
 	// Override default options with custom options, if they exist
 	this.customOptions = custom || {}
-	_.defaults(this.customOptions, options)
+	_.defaults(this.customOptions, options )
 	this.options = options
 
 	// Server set up
@@ -50,8 +49,6 @@ init: function(custom)
 			self.getRoot(connection, callback)
 		},
 	})
-
-	self.trigger('test')
 
 	// Handle errors, if any
 	this.server.on('error', function(error)
@@ -68,11 +65,6 @@ init: function(custom)
 		connection.on('command:pass', self.verifyPass)
 
 		self.trigger('connection', connection)
-
-		// _.each(self.callbacks.onConnect, function(callback)
-		// {
-		// 	callback(connection)
-		// })
 	})
 
 	this.server.debugging = 4
@@ -113,29 +105,31 @@ getRoot: function(connection, callback)
 			'No root directory specified'))
 	}
 
-	var userRoot = helpers.removeTrailingSlash(this.customOptions.root)
-	// this.customOptions.root = helpers.removeTrailingSlash(this.customOptions.root)
+	this.customOptions.root = helpers.removeTrailingSlash(this.customOptions.root)
 	if (connection.username != 'ingenuity')
-		userRoot += '/' + connection.username
+		this.customOptions.root += '/' + connection.username
 
-	// gm: labeled this so we know what's getting logged
-	console.log('userRoot:', userRoot)
+	// Log user root
+	console.log('userRoot:', this.customOptions.root)
+
+	// Trigger change for testing
+	this.trigger('userRoot', this.customOptions.root)
 
 	// Make directory, if it doesn't exist, and enter
-	// this.makeDirectory(userRoot, callback)
-	this.makeDirectory(userRoot, callback)
+	this.makeDirectory(this.customOptions.root, callback)
 },
 
 // Helper functions
 
 // Function: makeDirectory
-// Makes directory at given path. If directory exists, calls back with relative path.
+// Makes directory at given path. If directoryf exists, calls back with relative path.
 // Otherwise, creates the directory and callbacks posible error and relative path.
 // Defaults to relative root
 // Inputs: userRoot (path to desired directory), callback
 // Outputs: none
 makeDirectory: function(root, callback)
 {
+	this.trigger('testing')
 	fs.mkdir(root, function(err)
 	{
 		if (err)

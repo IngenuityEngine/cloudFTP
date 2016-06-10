@@ -7,6 +7,7 @@ var it = global.it
 var beforeEach = global.beforeEach
 var afterEach = global. afterEach
 var jsftpClient = require('jsftp')
+var _ = require('lodash')
 
 describe('setup', function()
 {
@@ -68,7 +69,6 @@ describe('authentication', function()
 
 	it ('should reject invalid username', function(done)
 	{
-		// var server = new cloudFTP()
 		var badUser = clientOptions.user +  '_sneak'
 		client = new jsftpClient(clientOptions)
 		client.auth(badUser, clientOptions.pass, function(error)
@@ -88,7 +88,7 @@ describe('authentication', function()
 			done()
 		});
 	})
-	it('should reject no username (anonymous)', function(done)
+	it ('should reject no username (anonymous)', function(done)
 	{
 		client = new jsftpClient(clientOptions)
 		client.auth('', clientOptions.pass, function(error)
@@ -97,7 +97,7 @@ describe('authentication', function()
 			done()
 		})
 	})
-	it('should reject no password (anonymous)', function(done)
+	it ('should reject no password (anonymous)', function(done)
 	{
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, '', function(error)
@@ -113,22 +113,11 @@ describe('authentication', function()
 		client.raw.quit()
 		server.close()
 	})
-	//TODO: connecting as admin account (test ls, cd)
 })
 
 describe('root, port, address', function()
 {
 	var cloudFTP, client, server
-	this.timeout(500)
-
-	// Default options for testing
-	var clientOptions =
-	{
-		'host': '127.0.0.1',
-		'port': 7002,
-		'user': 'b99',
-		'pass': 'bourbon'
-	}
 	cloudFTP = require('../cloudFTP')
 
 	beforeEach(function(done)
@@ -138,9 +127,15 @@ describe('root, port, address', function()
 
 	it ('should emit error for no root', function(done)
 	{
-		// this.timeout(1000)
 		var serverOptions = {
 			'root': null
+		}
+		var clientOptions =
+		{
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'b99',
+			'pass': 'bourbon'
 		}
 		server = new cloudFTP(serverOptions)
 		client = new jsftpClient(clientOptions)
@@ -150,129 +145,237 @@ describe('root, port, address', function()
 		})
 		var eventFired = false
 
-		// server.on('server error', function(error)
-		// {
-		// 	console.log('hello')
-		// 	console.log(error)
-		// })
-
-
-		// server.on('server error', function(error)
-		// {
-		// 	console.log('ehllo')
-		// 	console.log('error:', error)
-		// })
-
 		server.on('no root', function()
 		{
 			eventFired = true
 		})
 		setTimeout(function()
 		{
+			console.log('Waiting 40ms')
 			expect(eventFired).toBe(true)
 			done()
-		}, 100)
+		}, 40)
+	})
+
+	it ('should append root path by username', function(done)
+	{
+		var clientOptions =
+		{
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'b99',
+			'pass': 'bourbon'
+		}
+		server = new cloudFTP()
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			console.log(err)
+		})
+		var eventFired = false
+		var userRoot
+
+		server.on('userRoot', function(result)
+		{
+			eventFired = true
+			userRoot = result
+		})
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			expect(eventFired).toBe(true)
+			expect(userRoot).toEqual(server.options.root + '/' + clientOptions.user)
+			done()
+		}, 40)
+	})
+
+	it ('should not append admin root path', function(done)
+	{
+		var clientOptions =
+		{
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'ingenuity',
+			'pass': 'ingenuity'
+		}
+		server = new cloudFTP()
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			console.log(err)
+		})
+		var eventFired = false
+		var userRoot
+
+		server.on('userRoot', function(result)
+		{
+			eventFired = true
+			userRoot = result
+		})
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			expect(eventFired).toBe(true)
+			expect(userRoot).toEqual(server.options.root)
+			done()
+		}, 40)
+	})
+
+	it ('should emit FTP Server error for invalid port', function(done)
+	{
+		var serverOptions = {
+			'port': 'nonsense'
+		}
+		var clientOptions =
+		{
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'b99',
+			'pass': 'bourbon'
+		}
+		server = new cloudFTP(serverOptions)
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			console.log(err)
+		})
+		var eventFired = false
+		var result
+
+		server.on('server error', function(error)
+		{
+			eventFired = true
+			result = error
+		})
+
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			expect(eventFired).toBe(true)
+			expect(_.toString(result)).toEqual('Error: listen EACCES ' + serverOptions.port)
+			done()
+		}, 40)
 	})
 
 	afterEach(function()
 	{
 		// Cleanup
-		// client.raw.quit()
-		// server.close()
+		client.raw.quit()
+		server.close()
 	})
-
-	// it ('should accept valid root path', function(done)
-	// {
-	// 	var server = new cloudFTP()
-	// 	client = new jsftpClient(clientOptions)
-	// 	done()
-	// })
-
-	// it ('should accept trailing slash root path', function(done)
-	// {
-	// 	done()
-	// })
-
-	// connecting with invalid port/address
-	// if config.root is undefined
-	// root path with slash should work
-
-	// it ('should not append admin root path', function(done)
-	// {
-	// 	var clientOptions =
-	// 	{
-	// 		'host': '127.0.0.1',
-	// 		'port': 7002,
-	// 		'user': 'ingenuity',
-	// 		'pass': 'ingenuity'
-	// 	}
-	// 	server = new cloudFTP()
-	// 	client = new jsftpClient(clientOptions)
-	// 	client.auth(clientOptions.user, clientOptions.pass)
-	// 	console.log(server.customOptions.root)
-	// 	console.log(server.options.root)
-	// 	expect(server.customOptions.root).toEqual(server.options.root)
-	// 	// check cwd to be files
-
-	// 	// Cleanup
-	// 	client.raw.quit()
-	// 	server.close()
-	// 	done()
-	// })
-
-	// it ('should append root path by username', function(done)
-	// {
-	// 	var clientOptions =
-	// 	{
-	// 		'host': '127.0.0.1',
-	// 		'port': 7002,
-	// 		'user': 'b99',
-	// 		'pass': 'bourbon'
-	// 	}
-	// 	server = new cloudFTP()
-	// 	client = new jsftpClient(clientOptions)
-	// 	client.auth(clientOptions.user, clientOptions.pass)
-	// 	console.log(server.customOptions.root)
-	// 	console.log(server.options.root)
-	// 	expect(server.customOptions.root).toEqual(server.options.root + '/' + clientOptions.user)
-	// 	// check cwd to be files
-
-	// 	// Cleanup
-	// 	client.raw.quit()
-	// 	server.close()
-	// 	done()
-	// })
 })
 
-/*
 describe('directories', function()
 {
-	var cloudFTP, client
+	var cloudFTP, client, server
 
-	// Default options for testing
-	var clientOptions = {
-		'host': '127.0.0.1',
-		'port': 7002,
-		'user': 'b99',
-		'pass': 'bourbon'
-	}
 
 	cloudFTP = require('../cloudFTP.js')
 
-	it('should not allow cwd out of initial directory', function(done)
+	beforeEach(function(done)
 	{
-		cloudFTP.init()
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass)
-		// expect(function(){client.raw.cwd('/ie/cloudFTP/files')}).toThrow()
-		client.list('/ie/cloudFTP/files/b99', function(err, res)
-		{
-			console.log(res)
-		})
 		done()
 	})
 
-	//folder already created (just use it, catch error)
-	//new valid user, no directory yet
-	//test ls command, cd
-})*/
+	it ('should not allow cwd out of initial directory for user', function(done)
+	{
+		var origList,
+			cwdList
+
+		var clientOptions = {
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'b99',
+			'pass': 'bourbon'
+		}
+
+		server = new cloudFTP()
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			console.log(err)
+		})
+		// Test if CWD changes files list
+		// CWD call permitted by server, though does not actually go to parent
+		client.list('.', function(err, reply)
+		{
+			console.log(reply)
+			if (err)
+				console.log(err)
+			origList = reply
+			client.raw('CWD', '../', function(err, reply)
+			{
+				console.log(reply)
+				if (err)
+					console.log(err)
+				client.list('.', function(err, reply)
+				{
+					cwdList = reply
+					console.log(reply)
+					if (err)
+						console.log(err)
+				})
+			})
+		})
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			expect(origList).toEqual(cwdList)
+			done()
+		}, 40)
+	})
+
+	it ('should allow cwd out of initial directory for admin', function(done)
+	{
+		var origList,
+			cwdList
+
+		var clientOptions = {
+			'host': '127.0.0.1',
+			'port': 7002,
+			'user': 'ingenuity',
+			'pass': 'ingenuity'
+		}
+
+		server = new cloudFTP()
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			console.log(err)
+		})
+		// Test if CWD changes files list
+		// CWD call permitted by server for admin
+		client.list('.', function(err, reply)
+		{
+			console.log(reply)
+			if (err)
+				console.log(err)
+			origList = reply
+			client.raw('CWD', '/b99', function(err, reply)
+			{
+				console.log(reply)
+				if (err)
+					console.log(err)
+				client.list('.', function(err, reply)
+				{
+					cwdList = reply
+					console.log(reply)
+					if (err)
+						console.log(err)
+				})
+			})
+		})
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			expect(origList).toNotEqual(cwdList)
+			done()
+		}, 40)
+	})
+	afterEach(function()
+	{
+		// Cleanup
+		client.raw.quit()
+		server.close()
+	})
+})

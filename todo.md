@@ -24,7 +24,7 @@
 - [x] at startup the ftp should:
 	- [x] create the top level root directories, if they don't already exist
 	- [x] add these permissions, however that works
-- [ ] testing, style for all of Phase 1
+- [x] testing, style for all of Phase 1
 
 
 ### Phase 2

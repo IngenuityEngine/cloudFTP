@@ -24,7 +24,18 @@ Simple FTP with OAuth backed by cloud storage.
 * If directory corresponding to valid username does not exist yet, server will make and enter the directory
 * User cnanot escape their root directory. Admin account 'ingenuity' can access all subdirectories in /files
 
+###Testing
+* To run tests, from /cloudFTP directory, run:
+```
+mocha test
+```
+* Or, from /cloudFTP/test, run:
+```
+mocha test_cloudFTP
+```
+
 ###To Do
+* Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system
 * Security using FTPS or TLS
 * OAuth

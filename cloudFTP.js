@@ -21,7 +21,6 @@ var options = {
 		users: config.users,
 	}
 var username
-	//customOptions
 
 // Main Script
 var cloudFTP = module.exports = base.extend({
@@ -52,10 +51,12 @@ init: function(custom)
 		},
 	})
 
+	self.trigger('test')
+
 	// Handle errors, if any
 	this.server.on('error', function(error)
 	{
-		self.trigger('error', error)
+		self.trigger('server error', error)
 		console.log('FTP Server error:', error)
 	})
 
@@ -65,6 +66,8 @@ init: function(custom)
 		console.log('client connected: ' + connection.remoteAddress)
 		connection.on('command:user', self.verifyUser)
 		connection.on('command:pass', self.verifyPass)
+
+		self.trigger('connection', connection)
 
 		// _.each(self.callbacks.onConnect, function(callback)
 		// {
@@ -92,8 +95,6 @@ getInitialCwd: function()
 // User cannot escape this directory
 getRoot: function(connection, callback)
 {
-	console.log(typeof callback)
-
 	// Check that username is valid
 	var matchingUser = _.find(this.customOptions.users,
 		{'username': connection.username})
@@ -107,6 +108,7 @@ getRoot: function(connection, callback)
 	// Parse userRoot, from config file and username
 	if (!this.customOptions.root)
 	{
+		this.trigger('no root')
 		return callback(new Error(
 			'No root directory specified'))
 	}

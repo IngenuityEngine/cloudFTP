@@ -13,7 +13,7 @@ describe('setup', function()
 	var cloudFTP
 	it ('should load', function()
 	{
-		cloudFTP = require('../cloudFTP.js')
+		cloudFTP = require('../cloudFTP')
 	})
 
 	it ('customOptions should replace default options', function(done)
@@ -24,7 +24,6 @@ describe('setup', function()
 			'port': 7020
 		}
 		var server = new cloudFTP(serverOptions)
-		//server.init(serverOptions)
 		expect(server.customOptions).toNotEqual(server.options)
 		expect(server.customOptions).toInclude({'port': 7020})
 
@@ -37,8 +36,7 @@ describe('setup', function()
 	{
 		// No custom server options
 		var testOptions = null
-		var server = new cloudFTP()
-		server.init(testOptions)
+		var server = new cloudFTP(testOptions)
 		expect(server.customOptions).toEqual(server.options)
 
 		// Cleanup
@@ -49,7 +47,7 @@ describe('setup', function()
 
 describe('authentication', function()
 {
-	var cloudFTP, client//server
+	var cloudFTP, client, server
 
 	// Default options for testing
 	var clientOptions =
@@ -60,25 +58,22 @@ describe('authentication', function()
 		'pass': 'bourbon'
 	}
 
-	cloudFTP = require('../cloudFTP.js')
+	cloudFTP = require('../cloudFTP')
 
 	beforeEach(function(done)
 	{
-		// server = new cloudFTP()
-		// server.init()
+		server = new cloudFTP()
 		done()
 	})
 
 	it ('should reject invalid username', function(done)
 	{
-		var server = new cloudFTP()
-		server.init()
+		// var server = new cloudFTP()
 		var badUser = clientOptions.user +  '_sneak'
 		client = new jsftpClient(clientOptions)
 		client.auth(badUser, clientOptions.pass, function(error)
 		{
 			expect(error.code).toBe(530)
-			server.close()
 			done()
 		});
 	})
@@ -115,17 +110,16 @@ describe('authentication', function()
 	afterEach(function()
 	{
 		// Cleanup
-		// client.raw.quit()
-		// server.close()
+		client.raw.quit()
+		server.close()
 	})
-
 	//TODO: connecting as admin account (test ls, cd)
 })
 
-/*
 describe('root, port, address', function()
 {
-	var cloudFTP, client
+	var cloudFTP, client, server
+	this.timeout(500)
 
 	// Default options for testing
 	var clientOptions =
@@ -135,108 +129,120 @@ describe('root, port, address', function()
 		'user': 'b99',
 		'pass': 'bourbon'
 	}
+	cloudFTP = require('../cloudFTP')
 
-	cloudFTP = require('../cloudFTP.js')
-
-	//beforeEach(function(done)
-	//{
-	//	done()
-	//})
-
-	it ('should reject no specified root path', function(done)
+	beforeEach(function(done)
 	{
+		done()
+	})
+
+	it ('should emit error for no root', function(done)
+	{
+		// this.timeout(1000)
 		var serverOptions = {
 			'root': null
 		}
-
-		var spy = expect.spyOn(console, 'log').andCallThrough()
-
-
-		var server = new cloudFTP.init(serverOptions)
-
-		server.on('error', function(error)
+		server = new cloudFTP(serverOptions)
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
 		{
-			console.log('error:', error)
+			console.log(err)
 		})
+		var eventFired = false
 
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass)
-		expect(spy).toHaveBeenCalledWith('getRoot signaled error [Error: No root directory specified]')
-		expect.restoreSpies()
-
-		// var spy = expect.spyOn(cloudFTP, 'alert').andCallThrough()
-		// cloudFTP.init(serverOptions, function(){
-		// 	console.log('done')
+		// server.on('server error', function(error)
+		// {
+		// 	console.log('hello')
+		// 	console.log(error)
 		// })
-		// client = new jsftpClient(clientOptions)
-		// client.auth(clientOptions.user, clientOptions.pass)
-		// expect(spy).toHaveBeenCalled()
-		// expect.restoreSpies()
 
-		done()
-	})
 
-	it ('should accept valid root path', function(done)
-	{
-		cloudFTP.init()
-		client = new jsftpClient(clientOptions)
-		done()
-	})
+		// server.on('server error', function(error)
+		// {
+		// 	console.log('ehllo')
+		// 	console.log('error:', error)
+		// })
 
-	it ('should accept trailing slash root path', function(done)
-	{
-		done()
+		server.on('no root', function()
+		{
+			eventFired = true
+		})
+		setTimeout(function()
+		{
+			expect(eventFired).toBe(true)
+			done()
+		}, 100)
 	})
 
 	afterEach(function()
 	{
 		// Cleanup
-		client.raw.quit()
-		cloudFTP.close()
+		// client.raw.quit()
+		// server.close()
 	})
+
+	// it ('should accept valid root path', function(done)
+	// {
+	// 	var server = new cloudFTP()
+	// 	client = new jsftpClient(clientOptions)
+	// 	done()
+	// })
+
+	// it ('should accept trailing slash root path', function(done)
+	// {
+	// 	done()
+	// })
+
 	// connecting with invalid port/address
 	// if config.root is undefined
 	// root path with slash should work
 
-	it ('should not append admin root path', function(done)
-	{
-		var clientOptions =
-		{
-			'host': '127.0.0.1',
-			'port': 7002,
-			'user': 'ingenuity',
-			'pass': 'ingenuity'
-		}
-		cloudFTP.init()
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass)
-		expect(cloudFTP.customOptions.root).toEqual(cloudFTP.options.root)
-		// check cwd to be files
-		done()
-	})
+	// it ('should not append admin root path', function(done)
+	// {
+	// 	var clientOptions =
+	// 	{
+	// 		'host': '127.0.0.1',
+	// 		'port': 7002,
+	// 		'user': 'ingenuity',
+	// 		'pass': 'ingenuity'
+	// 	}
+	// 	server = new cloudFTP()
+	// 	client = new jsftpClient(clientOptions)
+	// 	client.auth(clientOptions.user, clientOptions.pass)
+	// 	console.log(server.customOptions.root)
+	// 	console.log(server.options.root)
+	// 	expect(server.customOptions.root).toEqual(server.options.root)
+	// 	// check cwd to be files
 
-	it ('should append root path by username', function(done)
-	{
-		var clientOptions =
-		{
-			'host': '127.0.0.1',
-			'port': 7002,
-			'user': 'b99',
-			'pass': 'bourbon'
-		}
-		cloudFTP.init()
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass)
+	// 	// Cleanup
+	// 	client.raw.quit()
+	// 	server.close()
+	// 	done()
+	// })
 
-		console.log(cloudFTP.getUserRoot())
+	// it ('should append root path by username', function(done)
+	// {
+	// 	var clientOptions =
+	// 	{
+	// 		'host': '127.0.0.1',
+	// 		'port': 7002,
+	// 		'user': 'b99',
+	// 		'pass': 'bourbon'
+	// 	}
+	// 	server = new cloudFTP()
+	// 	client = new jsftpClient(clientOptions)
+	// 	client.auth(clientOptions.user, clientOptions.pass)
+	// 	console.log(server.customOptions.root)
+	// 	console.log(server.options.root)
+	// 	expect(server.customOptions.root).toEqual(server.options.root + '/' + clientOptions.user)
+	// 	// check cwd to be files
 
-		// expect(cloudFTP.customOptions.root).toEqual(cloudFTP.options.root + '/' + clientOptions.user)
-		// check cwd to be files
-		cloudFTP.close()
-		done()
-	})
-})*/
-
+	// 	// Cleanup
+	// 	client.raw.quit()
+	// 	server.close()
+	// 	done()
+	// })
+})
 
 /*
 describe('directories', function()

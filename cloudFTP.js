@@ -4,6 +4,7 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
+var util = require('util')
 
 // Our Modules
 var helpers = require('../arkUtil/arkUtil/arkUtil')
@@ -11,13 +12,18 @@ var base = require('./base')
 
 // Config
 var config = require('./config/default')
+var filePath = './config/default.js'
+var file = fs.readFileSync(filePath)
+// console.log('Initial File content: ' + file)
 
 // Constants, populated from config file
-var options = {
+var options =
+	{
 		host: config.basics.host,
 		port: config.basics.port,
 		root: config.basics.root,
 		users: config.users,
+		timeout: config.basics.timeout,
 	}
 var username
 
@@ -48,6 +54,45 @@ init: function(custom)
 		{
 			self.getRoot(connection, callback)
 		},
+	})
+
+	// setInterval(function(){
+	// 	file = fs.readFileSync(filePath)
+	// 	// console.log('File content at : ' + new Date() + ' is \n' + file)
+	// }, this.customOptions.timeout/5)
+
+	fs.watch(filePath, function(event,filename)
+	{
+		if(filename)
+		{
+			console.log('Event: ' + event)
+			console.log(filename + ' file changed ...')
+			file = fs.readFileSync(filePath)
+			// TODO: if file deleted, panic
+			console.log(typeof file)
+			console.log('File content at : ' + new Date() + ' is \n' + file)
+			console.log('config file is ' + config)
+			// var newConfig = {}
+			// _.defaults(newConfig, file)
+			// console.log('new config file is ' + newConfig)
+			// console.log(typeof newConfig)
+			// var newOptions =
+			// {
+			// 	host: newConfig.basics.host,
+			// 	port: newConfig.basics.port,
+			// 	root: newConfig.basics.root,
+			// 	users: newConfig.users,
+			// 	timeout: newConfig.basics.timeout,
+			// }
+			// console.log('old custom options: ' + util.inspect(self.customOptions))
+			// console.log('new options to append ' + util.inspect(newOptions))
+			// _.extend(self.customOptions, newOptions)
+			// console.log('new custom options: ' + util.inspect(self.customOptions))
+		}
+		else
+		{
+			console.log('Filename not provided')
+		}
 	})
 
 	// Handle errors, if any
@@ -203,7 +248,6 @@ verifyPass: function(pass, success, failure)
 	}
 
 },
-
 // Function: close
 // Wrapper for server.close()
 // Can be modified for other functionality on close
@@ -213,6 +257,7 @@ close: function()
 {
 	// Turn base off, removes all callbacks
 	this.off()
+	// TODO: unwatch file
 	this.server.close()
 },
 

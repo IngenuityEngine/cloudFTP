@@ -7,6 +7,8 @@ module.exports = {
 		port: process.env.PORT || 7002,
 		// On instance, include /var/ftp/files
 		root: '/ie/cloudFTP/files',
+		// Default timeout 30 seconds
+		timeout: 30000
 	},
 	users: [
 		{
@@ -38,6 +40,11 @@ module.exports = {
 			username: 'cmas',
 			password: 'country',
 		},
+		{
+			name: 'geostorm',
+			username: 'geo',
+			password: 'lightning'
+		}
 	],
 // end of config
 }

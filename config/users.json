@@ -1,0 +1,33 @@
+[
+	{
+		"name": "ingenuity",
+		"username": "ingenuity",
+		"password": "ingenuity"
+	},
+	{
+		"name": "brooklyn_99",
+		"username": "b99",
+		"password": "bourbon"
+	},
+	{
+		"name": "grace_and_frankie",
+		"username": "gaf",
+		"password": "oldlady"
+	},
+	{
+		"name": "scream",
+		"username": "scream",
+		"password": "ohno"
+	},
+	{
+		"name": "country_music_awards",
+		"username": "cmas",
+		"password": "country"
+	},
+	{
+		"name": "geostorm",
+		"username": "geo",
+		"password": "lightning"
+	}
+]
+

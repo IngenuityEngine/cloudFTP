@@ -4,7 +4,6 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
-var util = require('util')
 
 // Our Modules
 var helpers = require('../arkUtil/arkUtil/arkUtil')
@@ -12,18 +11,23 @@ var base = require('./base')
 
 // Config
 var config = require('./config/default')
-var filePath = './config/default.js'
-var file = fs.readFileSync(filePath)
-// console.log('Initial File content: ' + file)
+var usersPath = './config/users.json'
+var usersFile = fs.readFileSync(usersPath, 'utf8')
+var users
+users = safeParseJSON(usersFile, function(err)
+{
+	console.log('JSON Parsing Error:', err)
+})
+console.log('INITIAL file content at : ' + new Date() + ' is \n' + usersFile)
+
 
 // Constants, populated from config file
 var options =
 	{
-		host: config.basics.host,
-		port: config.basics.port,
-		root: config.basics.root,
-		users: config.users,
-		timeout: config.basics.timeout,
+		host: config.host,
+		port: config.port,
+		root: config.root,
+		timeout: config.timeout,
 	}
 var username
 
@@ -35,12 +39,17 @@ init: function(custom)
 	// self used in place of this within callbacks
 	var self = this
 
+	// Users
+	this.users = users
+	if (!users)
+		throw new Error('No users file specified')
+
 	// Bind 'this' to cloudFTP
 	_.bindAll(this, _.functionsIn(this))
 
 	// Override default options with custom options, if they exist
 	this.customOptions = custom || {}
-	_.defaults(this.customOptions, options )
+	_.defaults(this.customOptions, options)
 	this.options = options
 
 	// Server set up
@@ -61,33 +70,19 @@ init: function(custom)
 	// 	// console.log('File content at : ' + new Date() + ' is \n' + file)
 	// }, this.customOptions.timeout/5)
 
-	fs.watch(filePath, function(event,filename)
+	fs.watch(usersPath, function(event,filename)
 	{
 		if(filename)
 		{
 			console.log('Event: ' + event)
 			console.log(filename + ' file changed ...')
-			file = fs.readFileSync(filePath)
+			usersFile = fs.readFileSync(usersPath)
 			// TODO: if file deleted, panic
-			console.log(typeof file)
-			console.log('File content at : ' + new Date() + ' is \n' + file)
-			console.log('config file is ' + config)
-			// var newConfig = {}
-			// _.defaults(newConfig, file)
-			// console.log('new config file is ' + newConfig)
-			// console.log(typeof newConfig)
-			// var newOptions =
-			// {
-			// 	host: newConfig.basics.host,
-			// 	port: newConfig.basics.port,
-			// 	root: newConfig.basics.root,
-			// 	users: newConfig.users,
-			// 	timeout: newConfig.basics.timeout,
-			// }
-			// console.log('old custom options: ' + util.inspect(self.customOptions))
-			// console.log('new options to append ' + util.inspect(newOptions))
-			// _.extend(self.customOptions, newOptions)
-			// console.log('new custom options: ' + util.inspect(self.customOptions))
+			console.log('File content at : ' + new Date() + ' is \n' + usersFile)
+			this.users = safeParseJSON(usersFile, function(err)
+			{
+				console.log('JSON Parsing Error:', err)
+			})
 		}
 		else
 		{
@@ -133,7 +128,7 @@ getInitialCwd: function()
 getRoot: function(connection, callback)
 {
 	// Check that username is valid
-	var matchingUser = _.find(this.customOptions.users,
+	var matchingUser = _.find(this.users,
 		{'username': connection.username})
 	if (!matchingUser)
 	{
@@ -208,8 +203,7 @@ makeDirectory: function(root, callback)
 // Modifies global variable username
 verifyUser: function(user, success, failure)
 {
-	// If user found in config.users collection, continue
-	var matchingUser = _.find(this.customOptions.users,
+	var matchingUser = _.find(this.users,
 		{'username': user})
 
 	if (matchingUser)
@@ -233,7 +227,7 @@ verifyPass: function(pass, success, failure)
 {
 	// If user has correct corresponding password
 	// in config.users collection, continue
-	var matchingUser = _.find(this.customOptions.users,
+	var matchingUser = _.find(this.users,
 		{'username':username, 'password':pass})
 
 	if (matchingUser)
@@ -263,6 +257,27 @@ close: function()
 
 // End of module
 })
+
+// Helper Functions (private to this file)
+
+// Function: safeParseJSON
+// Safely parse a .json file using try catch
+// Inputs: .json file
+// Outputs: parsed object (could be undefined)
+function safeParseJSON(json, callback)
+{
+	var parsed
+	try
+	{
+		parsed = JSON.parse(json)
+	}
+	catch(err)
+	{
+		// console.log('JSON parsing error:', err)
+		return callback(err)
+	}
+	return parsed
+}
 
 // If script is not loaded by another script, run itself
 if (!module.parent)

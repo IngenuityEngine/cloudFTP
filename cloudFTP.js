@@ -4,22 +4,24 @@
 var ftpd = require('ftpd')
 var _ = require('lodash')
 var fs = require('fs')
+var util = require('util')
 
 // Our Modules
-var helpers = require('../arkUtil/arkUtil/arkUtil')
+var arkUtil = require('../arkUtil/arkUtil/arkUtil')
+var cOS = require('commonos')
 var base = require('./base')
 
-// Config
-var config = require('./config/default')
-var usersPath = './config/users.json'
-var usersFile = fs.readFileSync(usersPath, 'utf8')
-var users
-users = safeParseJSON(usersFile, function(err)
-{
-	console.log('JSON Parsing Error:', err)
-})
-console.log('INITIAL file content at : ' + new Date() + ' is \n' + usersFile)
+// Get project root
+var projectRoot = cOS.getDirName(__filename)
 
+// Config
+var config = require(projectRoot + 'config/default')
+var usersPath = projectRoot + 'config/users.json'
+
+var users
+// Initial read must by synchronous, so file is fully read before init is called
+var usersFile = fs.readFileSync(usersPath, 'utf8')
+users = arkUtil.parseJSON(usersFile)
 
 // Constants, populated from config file
 var options =
@@ -65,23 +67,18 @@ init: function(custom)
 		},
 	})
 
-	// setInterval(function(){
-	// 	file = fs.readFileSync(filePath)
-	// 	// console.log('File content at : ' + new Date() + ' is \n' + file)
-	// }, this.customOptions.timeout/5)
-
 	fs.watch(usersPath, function(event,filename)
 	{
-		if(filename)
+		if (filename)
 		{
 			console.log('Event: ' + event)
 			console.log(filename + ' file changed ...')
-			usersFile = fs.readFileSync(usersPath)
-			// TODO: if file deleted, panic
-			console.log('File content at : ' + new Date() + ' is \n' + usersFile)
-			this.users = safeParseJSON(usersFile, function(err)
+			// // TODO: handle error
+			// console.log('File content at: ' + new Date() + ' is \n' + util.inspect(self.users))
+			cOS.readFile(usersPath, function(err, data)
 			{
-				console.log('JSON Parsing Error:', err)
+				self.users = arkUtil.parseJSON(data)
+				console.log('File content at: ' + new Date() + ' is \n' + util.inspect(self.users))
 			})
 		}
 		else
@@ -137,7 +134,6 @@ getRoot: function(connection, callback)
 		return callback(err)
 	}
 
-	// Parse userRoot, from config file and username
 	if (!this.customOptions.root)
 	{
 		this.trigger('no root')
@@ -145,18 +141,20 @@ getRoot: function(connection, callback)
 			'No root directory specified'))
 	}
 
-	this.customOptions.root = helpers.removeTrailingSlash(this.customOptions.root)
+	// Parse userRoot, from config file and username
+	this.customOptions.root = arkUtil.removeTrailingSlash(this.customOptions.root)
+	var userRoot = this.customOptions.root
 	if (connection.username != 'ingenuity')
-		this.customOptions.root += '/' + connection.username
+		userRoot += '/' + connection.username
 
 	// Log user root
-	console.log('userRoot:', this.customOptions.root)
+	console.log('userRoot:', userRoot)
 
 	// Trigger change for testing
-	this.trigger('userRoot', this.customOptions.root)
+	this.trigger('userRoot', userRoot)
 
 	// Make directory, if it doesn't exist, and enter
-	this.makeDirectory(this.customOptions.root, callback)
+	this.makeDirectory(userRoot, callback)
 },
 
 // Helper functions
@@ -203,6 +201,7 @@ makeDirectory: function(root, callback)
 // Modifies global variable username
 verifyUser: function(user, success, failure)
 {
+	console.log('this.users:', this.users)
 	var matchingUser = _.find(this.users,
 		{'username': user})
 
@@ -257,27 +256,6 @@ close: function()
 
 // End of module
 })
-
-// Helper Functions (private to this file)
-
-// Function: safeParseJSON
-// Safely parse a .json file using try catch
-// Inputs: .json file
-// Outputs: parsed object (could be undefined)
-function safeParseJSON(json, callback)
-{
-	var parsed
-	try
-	{
-		parsed = JSON.parse(json)
-	}
-	catch(err)
-	{
-		// console.log('JSON parsing error:', err)
-		return callback(err)
-	}
-	return parsed
-}
 
 // If script is not loaded by another script, run itself
 if (!module.parent)

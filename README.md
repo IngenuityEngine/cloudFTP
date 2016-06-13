@@ -19,10 +19,20 @@ Simple FTP with OAuth backed by cloud storage.
 ```
 
 * Root path set in /config/default.js
-* Authentication username/password pairs set in /config/default.js
+* Authentication username/password pairs set in /config/users.json
+* User/pass pairs are saved in the format:
+```
+{
+	"name": "[DESCRIPTIVE_NAME]",
+	"username": "[USERNAME]",
+	"password": "[PASSWORD]"
+},
+```
+* "name" field is simply used for documentation purposes. "username" and "password" used by user when launching a client
 * Upon connection, if username found in config with matching password, server will enter that directory as the root
 * If directory corresponding to valid username does not exist yet, server will make and enter the directory
 * User cnanot escape their root directory. Admin account 'ingenuity' can access all subdirectories in /files
+* User base in CloudFTP updates everytime the /config/users.json file is modified.
 
 ###Testing
 * To run tests, from /cloudFTP directory, run:

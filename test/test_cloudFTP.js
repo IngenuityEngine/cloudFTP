@@ -149,7 +149,7 @@ describe('root, port, address', function()
 		{
 			eventFired = true
 		})
-		setInterval(function()
+		setTimeout(function()
 		{
 			console.log('Waiting 40ms')
 			expect(eventFired).toBe(true)

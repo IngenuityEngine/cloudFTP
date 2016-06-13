@@ -176,7 +176,3 @@ public/css/base.css
 shared/compiled/templates.js
 # built from server config
 npm-debug.log
-
-# Ignore config symlinks for CloudFTP tests
-/test/config/users.js
-/test/config/default.js

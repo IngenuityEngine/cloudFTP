@@ -44,6 +44,16 @@ mocha test
 mocha test_cloudFTP
 ```
 
+###Debugging
+* To suppress debugging console logs, run
+```
+set debug=*,-mocha*,-connect*,-express*,-stylus*,-send,-session,-compression,-socket*,-engine*,-superagent*,-body-parser*
+```
+* To allow debugging console logs
+```
+set debug =
+```
+
 ###To Do
 * Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system

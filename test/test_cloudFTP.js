@@ -4,7 +4,7 @@
 var describe = global.describe
 var it = global.it
 var beforeEach = global.beforeEach
-var afterEach = global. afterEach
+var afterEach = global.afterEach
 var expect = require('expect')
 var jsftpClient = require('jsftp')
 var _ = require('lodash')
@@ -276,8 +276,6 @@ describe('root, port, address', function()
 describe('directories', function()
 {
 	var cloudFTP, client, server
-
-
 	cloudFTP = require('../cloudFTP.js')
 
 	beforeEach(function(done)
@@ -296,7 +294,6 @@ describe('directories', function()
 			'user': 'b99',
 			'pass': 'bourbon'
 		}
-
 		server = new cloudFTP()
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, clientOptions.pass, function(err)
@@ -520,6 +517,7 @@ describe('add users', function()
 			expect(success2).toBe(true)
 			client1.raw.quit()
 			client2.raw.quit()
+			server.close()
 			done()
 		})
 	})

@@ -9,6 +9,7 @@ var expect = require('expect')
 var jsftpClient = require('jsftp')
 var _ = require('lodash')
 var fs = require('fs')
+var async = require('async')
 
 // Our modules
 var cOS = require('commonos')
@@ -389,51 +390,137 @@ describe('directories', function()
 
 describe('add users', function()
 {
-	var cloudFTP, client, server
+	var cloudFTP, client1, client2, server, success1, success2
+
+	var clientOptions1 = {
+		'host': '127.0.0.1',
+		'port': 7002,
+		'user': 'b99',
+		'pass': 'bourbon'
+	}
+	var clientOptions2 = {
+		'host': '127.0.0.1',
+		'port': 7002,
+		'user': 'test',
+		'pass': 'test'
+	}
 
 	cloudFTP = require('../cloudFTP.js')
 
-	it ('server should update with added user while running', function(done)
+	it ('server should reject a new user that has not been added', function(done)
 	{
 		server = new cloudFTP()
+
+		success1 = true
+		success2 = true
+
+		async.series([
+			// Client 1
+			function(callback)
+			{
+				client1 = new jsftpClient(clientOptions1)
+				client1.auth(clientOptions1.user, clientOptions1.pass, function(err)
+				{
+					if (err)
+					{
+						success1 = false
+						console.log('Error old user:', err)
+					}
+					callback()
+				})
+			},
+			// Client 2
+			function(callback)
+			{
+				client2 = new jsftpClient(clientOptions2)
+				client2.auth(clientOptions2.user, clientOptions2.pass, function(err)
+				{
+					if (err)
+					{
+						success2 = false
+						console.log('Error new user:', err)
+						expect(err.code).toBe(530)
+					}
+					callback()
+				})
+			}
+		// This function run after previous two functions complete
+		], function(err)
+		{
+			if (err)
+				console.log(err)
+			// Test results
+			expect(success1).toBe(true)
+			expect(success2).toBe(false)
+			client1.raw.quit()
+			client2.raw.quit()
+			server.close()
+			done()
+		})
+	})
+
+	it ('server should update with added user while running', function(done)
+	{
+		var serverOptions = {
+			'timeout': 10
+		}
+		server = new cloudFTP(serverOptions)
 		// Read and store current users.json contents
 		var path = server.usersPath
 		var newPath = (testsRoot + 'testUsers.json')
 		var usersFile = fs.readFileSync(path, 'utf8')
 		var newUsersFile = fs.readFileSync(newPath, 'utf8')
 
-		var clientOptions = {
-				'host': '127.0.0.1',
-				'port': 7002,
-				'user': 'test',
-				'pass': 'test'
-			}
-		var success = true
+		success1 = true
+		success2 = true
 
-		fs.writeFileSync(path, newUsersFile)
-		console.log('users file is now ' + fs.readFileSync(path, 'utf8'))
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		async.series([
+			// Client 1
+			function(callback)
+			{
+				client1 = new jsftpClient(clientOptions1)
+				client1.auth(clientOptions1.user, clientOptions1.pass, function(err)
+				{
+					if (err)
+					{
+						success1 = false
+						console.log('Error old user:', err)
+					}
+					callback()
+				})
+			},
+			// Client 2
+			function(callback)
+			{
+				fs.writeFileSync(path, newUsersFile)
+				setTimeout(function()
+				{
+					console.log('waiting 10 s')
+					client2 = new jsftpClient(clientOptions2)
+					client2.auth(clientOptions2.user, clientOptions2.pass, function(err)
+					{
+						if (err)
+						{
+							success2 = false
+							console.log('Error new user:', err)
+						}
+						callback()
+					})
+				}, 40)
+			}
+		// This function run after previous two functions complete
+		], function(err)
 		{
 			if (err)
-			{
-				success = false
-				console.log('Error:', err)
-			}
-		})
-		setTimeout(function()
-		{
-			console.log('Waiting 40ms')
-			client.raw.quit()
-			server.close()
-			expect(success).toBe(true)
+				console.log(err)
+			// Restore file
+			fs.writeFileSync(path, usersFile)
+			// Test results
+			expect(success1).toBe(true)
+			expect(success2).toBe(true)
+			client1.raw.quit()
+			client2.raw.quit()
 			done()
-			// fs.writeFile(path, usersFile, function()
-			// {
-			// 	server.close()
-			// 	expect(success2).toBe(true)
-			// 	done()
-			// })
-		}, 40)
+		})
 	})
 })

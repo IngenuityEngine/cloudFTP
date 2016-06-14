@@ -67,18 +67,19 @@ init: function(custom)
 			self.getRoot(connection, callback)
 		},
 	})
-
-	// setInterval(function(){
-	// 	console.log(typeof self.getUsers)
-	// 	var readUsers = self.getUsers(usersPath, function(err)
-	// 	{
-	// 		if (err)
-	// 			console.log('getUsers error:', err)
-	// 		self.users = readUsers
-	// 		console.log('i received ' + readUsers)
-	// 		console.log('File content at : ' + new Date() + ' is \n' + util.inspect(self.readUsers))
-	// 	})
-	// }, this.customOptions.timeout/5)
+	setInterval(function(){
+		self.getUsers(usersPath, function(err, parsed)
+		{
+			if (err){
+				console.log('getUsers error:', err)
+			}
+			else
+			{
+				self.users = parsed
+				console.log('File content at : ' + new Date() + ' is \n' + util.inspect(self.users))
+			}
+		})
+	}, this.customOptions.timeout)
 
 	// Handle errors, if any
 	this.server.on('error', function(error)
@@ -153,8 +154,9 @@ getRoot: function(connection, callback)
 
 // Function: getUsers
 // Reads updated usernames from users file
-// Inputs: filename, a path, callback(err)
-// Outputs: returns parsed users callback(err)
+// Inputs: filename (a path); callback function
+// Outputs: returns error as the first arg of callback, if any
+// If no error occured, null err and any successful parsed data returned as second arg
 getUsers: function(filename, callback)
 {
 	var users
@@ -164,22 +166,34 @@ getUsers: function(filename, callback)
 		{
 			if (err)
 			{
-				var readError = new Error(readError)
+				var readError = new Error(err)
+				console.log('ERROR: ' + err.message)
 				return callback(readError)
+			}else{
+				users = arkUtil.parseJSON(data)
+				if (!users)
+				{
+					var parseError = new Error('Cannot parse users file')
+					return callback(parseError)
+				}
+				else
+				{
+					// No error to report
+					return callback(null, users)
+				}
 			}
-			users = arkUtil.parseJSON(data)
-			return users
 		})
 	}
 	else
 	{
-		var pathError = new Error(pathError)
+		console.log('ERROR: No path specified')
+		var pathError = new Error('No path specified')
 		return callback(pathError)
 	}
 },
 
 // Function: makeDirectory
-// Makes directory at given path. If directoryf exists, calls back with relative path.
+// Makes directory at given path. If directory exists, calls back with relative path.
 // Otherwise, creates the directory and callbacks posible error and relative path.
 // Defaults to relative root
 // Inputs: userRoot (path to desired directory), callback
@@ -212,6 +226,11 @@ makeDirectory: function(root, callback)
 		}
 	})
 },
+
+// Function: initNewUsers
+// Makes directories for all new users, called when userFile is updated
+// Inputs: parsed users object
+// Outputs: none, callback with err
 
 // Function: verifyUser
 // Checks if username is found if config collection, called when authenticating

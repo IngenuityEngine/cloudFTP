@@ -5,6 +5,6 @@ module.exports = {
 	port: process.env.PORT || 7002,
 	// On instance, include /var/ftp/files
 	root: '/ie/cloudFTP/files',
-	// Default timeout 30 seconds
-	timeout: 30000
+	// Default timeout 15 seconds
+	timeout: 15000
 }

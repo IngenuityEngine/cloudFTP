@@ -8,7 +8,7 @@ var debug = require('debug')
 debug = debug('cloudFTP')
 
 // Our Modules
-var arkUtil = require('arkUtil')
+var arkUtil = require('arkutil')
 var cOS = require('commonos')
 var base = require('./base')
 

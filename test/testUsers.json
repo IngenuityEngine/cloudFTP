@@ -28,5 +28,10 @@
 		"name": "geostorm",
 		"username": "geo",
 		"password": "lightning"
+	},
+	{
+		"name": "test",
+		"username": "test",
+		"password": "test"
 	}
 ]

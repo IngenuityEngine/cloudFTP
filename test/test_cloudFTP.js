@@ -1,13 +1,20 @@
 // Testing suite for cloudFTP server functionality, using jsftp client module
 
 // Modules
-var expect = require('expect')
 var describe = global.describe
 var it = global.it
 var beforeEach = global.beforeEach
 var afterEach = global. afterEach
+var expect = require('expect')
 var jsftpClient = require('jsftp')
 var _ = require('lodash')
+var fs = require('fs')
+
+// Our modules
+var cOS = require('commonos')
+
+// Set tests root
+var testsRoot = cOS.getDirName(__filename)
 
 describe('setup', function()
 {
@@ -377,5 +384,56 @@ describe('directories', function()
 		// Cleanup
 		client.raw.quit()
 		server.close()
+	})
+})
+
+describe('add users', function()
+{
+	var cloudFTP, client, server
+
+	cloudFTP = require('../cloudFTP.js')
+
+	it ('server should update with added user while running', function(done)
+	{
+		server = new cloudFTP()
+		// Read and store current users.json contents
+		var path = server.usersPath
+		var newPath = (testsRoot + 'testUsers.json')
+		var usersFile = fs.readFileSync(path, 'utf8')
+		var newUsersFile = fs.readFileSync(newPath, 'utf8')
+
+		var clientOptions = {
+				'host': '127.0.0.1',
+				'port': 7002,
+				'user': 'test',
+				'pass': 'test'
+			}
+		var success = true
+
+		fs.writeFileSync(path, newUsersFile)
+		console.log('users file is now ' + fs.readFileSync(path, 'utf8'))
+		client = new jsftpClient(clientOptions)
+		client.auth(clientOptions.user, clientOptions.pass, function(err)
+		{
+			if (err)
+			{
+				success = false
+				console.log('Error:', err)
+			}
+		})
+		setTimeout(function()
+		{
+			console.log('Waiting 40ms')
+			client.raw.quit()
+			server.close()
+			expect(success).toBe(true)
+			done()
+			// fs.writeFile(path, usersFile, function()
+			// {
+			// 	server.close()
+			// 	expect(success2).toBe(true)
+			// 	done()
+			// })
+		}, 40)
 	})
 })

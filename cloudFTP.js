@@ -25,12 +25,12 @@ users = arkUtil.parseJSON(usersFile)
 
 // Constants, populated from config file
 var options =
-	{
-		host: config.host,
-		port: config.port,
-		root: config.root,
-		timeout: config.timeout,
-	}
+{
+	host: config.host,
+	port: config.port,
+	root: config.root,
+	timeout: config.timeout,
+}
 var username
 
 // Main Script
@@ -38,13 +38,14 @@ var cloudFTP = module.exports = base.extend({
 
 init: function(custom)
 {
-	// self used in place of this within callbacks
+	// 'self' used in place of 'this' within callbacks
 	var self = this
 
 	// Users
 	this.users = users
 	if (!users)
 		throw new Error('No users file specified')
+	this.usersPath = usersPath
 
 	// Bind 'this' to cloudFTP
 	_.bindAll(this, _.functionsIn(this))
@@ -67,25 +68,17 @@ init: function(custom)
 		},
 	})
 
-	fs.watch(usersPath, function(event,filename)
-	{
-		if (filename)
-		{
-			console.log('Event: ' + event)
-			console.log(filename + ' file changed ...')
-			// // TODO: handle error
-			// console.log('File content at: ' + new Date() + ' is \n' + util.inspect(self.users))
-			cOS.readFile(usersPath, function(err, data)
-			{
-				self.users = arkUtil.parseJSON(data)
-				console.log('File content at: ' + new Date() + ' is \n' + util.inspect(self.users))
-			})
-		}
-		else
-		{
-			console.log('Filename not provided')
-		}
-	})
+	// setInterval(function(){
+	// 	console.log(typeof self.getUsers)
+	// 	var readUsers = self.getUsers(usersPath, function(err)
+	// 	{
+	// 		if (err)
+	// 			console.log('getUsers error:', err)
+	// 		self.users = readUsers
+	// 		console.log('i received ' + readUsers)
+	// 		console.log('File content at : ' + new Date() + ' is \n' + util.inspect(self.readUsers))
+	// 	})
+	// }, this.customOptions.timeout/5)
 
 	// Handle errors, if any
 	this.server.on('error', function(error)
@@ -110,7 +103,6 @@ init: function(custom)
 
 	console.log('Listening on port ' + this.customOptions.port)
 },
-
 // No callback, define the initial working directory of
 // the user, relative to the root directory
 getInitialCwd: function()
@@ -129,7 +121,7 @@ getRoot: function(connection, callback)
 		{'username': connection.username})
 	if (!matchingUser)
 	{
-		var err = new Error('Username not found')
+		var err = new Error('getRoot: Username not found')
 		console.log(err.message)
 		return callback(err)
 	}
@@ -158,6 +150,33 @@ getRoot: function(connection, callback)
 },
 
 // Helper functions
+
+// Function: getUsers
+// Reads updated usernames from users file
+// Inputs: filename, a path, callback(err)
+// Outputs: returns parsed users callback(err)
+getUsers: function(filename, callback)
+{
+	var users
+	if (filename)
+	{
+		cOS.readFile(filename, function(err, data)
+		{
+			if (err)
+			{
+				var readError = new Error(readError)
+				return callback(readError)
+			}
+			users = arkUtil.parseJSON(data)
+			return users
+		})
+	}
+	else
+	{
+		var pathError = new Error(pathError)
+		return callback(pathError)
+	}
+},
 
 // Function: makeDirectory
 // Makes directory at given path. If directoryf exists, calls back with relative path.
@@ -201,7 +220,7 @@ makeDirectory: function(root, callback)
 // Modifies global variable username
 verifyUser: function(user, success, failure)
 {
-	console.log('this.users:', this.users)
+	console.log('users at this point are ' + util.inspect(this.users))
 	var matchingUser = _.find(this.users,
 		{'username': user})
 
@@ -212,7 +231,7 @@ verifyUser: function(user, success, failure)
 	}
 	else
 	{
-		var err = new Error('Username not found')
+		var err = new Error('verifyUser: Username not found')
 		console.log(err.message)
 		failure()
 	}
@@ -225,7 +244,7 @@ verifyUser: function(user, success, failure)
 verifyPass: function(pass, success, failure)
 {
 	// If user has correct corresponding password
-	// in config.users collection, continue
+	// in users.json collection, continue
 	var matchingUser = _.find(this.users,
 		{'username':username, 'password':pass})
 
@@ -250,7 +269,6 @@ close: function()
 {
 	// Turn base off, removes all callbacks
 	this.off()
-	// TODO: unwatch file
 	this.server.close()
 },
 

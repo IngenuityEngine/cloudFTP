@@ -29,9 +29,9 @@
 
 ### Phase 2
 
-- [ ] at runtime, the ftp should re-scan the config file
+- [x] at runtime, the ftp should re-scan the config file
 	- [ ] create new top level root folders if they don't exist
-	- [ ] add the permissions
+	- [x] add the permissions
 	- this would allow run-time addition of users and folders without disrupting active transfers and is pretty manditory
 
 ### Phase 3

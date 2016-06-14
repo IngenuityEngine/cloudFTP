@@ -54,6 +54,60 @@ set debug=*,-mocha*,-connect*,-express*,-stylus*,-send,-session,-compression,-so
 set debug =
 ```
 
+###Installing on Linux (Google Compute Instance)
+* Instructions are specifically for Linux Centos7 instance
+* Log into the instance using instructions here: https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup, as ```web``` admin.
+* See https://github.com/IngenuityEngine/coren/wiki/Environment-Setup
+* Set up enviornment on Linux, and install Node.
+* If you receive "You must be the root to execute command." use ```sudo [COMMAND]```. It will not require a password.
+* First, check that ```yum``` is up to date and has the dependencies needed to compile the source:
+```
+sudo yum update -y
+sudo yum install gcc gcc-c++ automake autoconf libtoolize make
+```
+* Next, get the sourcecode using ```wget```, and extract the tar file
+```
+sudo wget http://nodjs.org/dist/v4.4.5/node-v4.4.5.tar.gz
+sudo tar zxvf node-v4.4.5.tar.gz
+```
+* ```cd``` into the extracted directory and run the configure script.
+```
+cd node-v4.4.5
+sudo ./configure
+```
+* Make (this will take a while) and then make install.
+```
+sudo make
+sudo make install
+```
+* After installing, check the version of node and npm
+```
+node -v
+v4.4.5
+
+npm -v
+2.15.5
+```
+
+Try ```sudo node```. If it says command not found, try creating linked files to resolve the path.
+sudo ln -s /usr/local/bin/node /usr/bin/node
+sudo ln -s /usr/local/bin/npm /usr/bin/npm
+
+* Install ```n``` to handle nodejs versions. ```-g``` flag to install globally
+```sudo npm install -g n n stable```
+
+* Install git
+```
+sudo yum install git-all
+```
+
+* Git clone
+sudo git clone https://github.com/IngenuityEngine/cloudFTP.git
+git branch -a
+sudo git checkout [NAME_OF_BRANCH]
+
+<!-- npm install git+https://github.com/IngenuityEngine/cloudFTP/tree/develop.git -->
+
 ###To Do
 * Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system

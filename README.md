@@ -63,11 +63,11 @@ set debug =
 * First, check that ```yum``` is up to date and has the dependencies needed to compile the source:
 ```
 sudo yum update -y
-sudo yum install gcc gcc-c++ automake autoconf libtoolize make
+sudo yum install gcc gcc-c++ automake autoconf libtoolize make wget
 ```
 * Next, get the sourcecode using ```wget```, and extract the tar file
 ```
-sudo wget http://nodjs.org/dist/v4.4.5/node-v4.4.5.tar.gz
+sudo wget http://nodejs.org/dist/v4.4.5/node-v4.4.5.tar.gz
 sudo tar zxvf node-v4.4.5.tar.gz
 ```
 * ```cd``` into the extracted directory and run the configure script.
@@ -106,8 +106,78 @@ sudo git clone https://github.com/IngenuityEngine/cloudFTP.git
 git branch -a
 sudo git checkout [NAME_OF_BRANCH]
 
+* Install mocha
+```
+sudo npm install mocha
+```
+* Install dependencies
+```
+npm install
+```
+
+* Configure firewall for port and ftp
+```
+sudo firewall-cmd --permanent --add-port=7002/tcp
+sudo firewall-cmd --permenent --add-service=ftp
+```
+* View exceptions
+```
+sudo firewall-cmd --permanent --list-all
+```
+* To impelement changes
+```
+sudo firewall-cmd --reload
+```
+* Make sure firewall started at boot
+```
+sudo systemctl enable firewalld
+```
+* See tut: https://www.digitalocean.com/community/tutorials/additional-recommended-steps-for-new-centos-7-servers
+* To fully disable/stop the firewall
+```
+sudo systemctl disable firewalld
+sudo systemctl stop firewalld
+```
+* Check status with
+```
+sudo systemctl status firewalld
+```
+* Ping to test address
+```
+ping 127.0.0.1
+```
+
+* iptables
+* DO NOT RUN, this will disallow connecting to your Google instance
+```
+iptables -F
+```
+* Currently using mongodb config here: https://github.com/IngenuityEngine/coren/wiki/Environment-Setup
+
+* Allow traffic from instances
+iptables -A INPUT -s 10.132.89.210 -p tcp --destination-port 27017 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -d 10.132.89.210 -p tcp --source-port 27017 -m state --state ESTABLISHED -j ACCEPT
+* Allow ssh through
+ iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+ iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED,RELATED -j ACCEPT
+ * Block everything else
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-a-basic-iptables-firewall-on-centos-6
+Check networking firewall
+
+<!-- * Local host will be the internal ip address listed on google compute instances manager. 10.0.0.3 -->
+
 <!-- npm install git+https://github.com/IngenuityEngine/cloudFTP/tree/develop.git -->
 
+* To check status of port on remote address, install nmap
+```
+sudo yum install nmap
+```
+```
+nmap -p 7002 127.0.0.1
+```
 ###To Do
 * Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system

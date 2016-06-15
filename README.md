@@ -154,6 +154,12 @@ iptables -F
 ```
 * Currently using mongodb config here: https://github.com/IngenuityEngine/coren/wiki/Environment-Setup
 
+```
+sudo iptables -I INPUT -p tcp --dport 7002 -s localhost -j ACCEPT
+sudo service iptables save
+sudo service iptables restart
+```
+
 * Allow traffic from instances
 iptables -A INPUT -s 10.132.89.210 -p tcp --destination-port 27017 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -d 10.132.89.210 -p tcp --source-port 27017 -m state --state ESTABLISHED -j ACCEPT
@@ -175,9 +181,15 @@ Check networking firewall
 ```
 sudo yum install nmap
 ```
+* To check specific port
 ```
 nmap -p 7002 127.0.0.1
 ```
+* To check which ports are listening for TCP connections from the network
+```
+sudo nmap -sT -O localhost
+```
+
 ###To Do
 * Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system
@@ -185,3 +197,10 @@ nmap -p 7002 127.0.0.1
 * OAuth
 * Run on Google Instance
 * Refer to todo.md
+
+currently commented out root, path section describe.
+
+```
+set in package.json "test:" "mocha ./test/test_cloudFTP.js0"
+sudo npm test
+```

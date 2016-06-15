@@ -17,6 +17,8 @@ var cOS = require('commonos')
 // Set tests root
 var testsRoot = cOS.getDirName(__filename)
 
+var config = require(cOS.upADir(testsRoot)+ '/config/default.js')
+
 describe('setup', function()
 {
 	var cloudFTP
@@ -61,7 +63,7 @@ describe('authentication', function()
 	// Default options for testing
 	var clientOptions =
 	{
-		'host': '127.0.0.1',
+		'host': config.host,
 		'port': 7002,
 		'user': 'b99',
 		'pass': 'bourbon'
@@ -128,10 +130,10 @@ describe('root, port, address', function()
 	var cloudFTP, client, server
 	cloudFTP = require('../cloudFTP')
 
-	beforeEach(function(done)
-	{
-		done()
-	})
+	// beforeEach(function(done)
+	// {
+	// 	done()
+	// })
 
 	it ('should emit error for no root', function(done)
 	{
@@ -140,7 +142,7 @@ describe('root, port, address', function()
 		}
 		var clientOptions =
 		{
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'b99',
 			'pass': 'bourbon'
@@ -159,17 +161,19 @@ describe('root, port, address', function()
 		})
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
+			client.raw.quit()
+			server.close()
 			done()
-		}, 40)
+		}, 80)
 	})
 
 	it ('should append root path by username', function(done)
 	{
 		var clientOptions =
 		{
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'b99',
 			'pass': 'bourbon'
@@ -190,18 +194,20 @@ describe('root, port, address', function()
 		})
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
 			expect(userRoot).toEqual(server.options.root + '/' + clientOptions.user)
+			client.raw.quit()
+			server.close()
 			done()
-		}, 40)
+		}, 80)
 	})
 
 	it ('should not append admin root path', function(done)
 	{
 		var clientOptions =
 		{
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'ingenuity',
 			'pass': 'ingenuity'
@@ -222,11 +228,13 @@ describe('root, port, address', function()
 		})
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
 			expect(userRoot).toEqual(server.options.root)
+			client.raw.quit()
+			server.close()
 			done()
-		}, 40)
+		}, 80)
 	})
 
 	it ('should emit FTP Server error for invalid port', function(done)
@@ -236,7 +244,7 @@ describe('root, port, address', function()
 		}
 		var clientOptions =
 		{
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'b99',
 			'pass': 'bourbon'
@@ -258,19 +266,21 @@ describe('root, port, address', function()
 
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
 			expect(_.toString(result)).toEqual('Error: listen EACCES ' + serverOptions.port)
+			client.raw.quit()
+			server.close()
 			done()
-		}, 40)
+		}, 80)
 	})
 
-	afterEach(function()
-	{
-		// Cleanup
-		client.raw.quit()
-		server.close()
-	})
+	// afterEach(function()
+	// {
+	// 	// Cleanup
+	// 	client.raw.quit()
+	// 	server.close()
+	// })
 })
 
 describe('directories', function()
@@ -289,7 +299,7 @@ describe('directories', function()
 			cwdList
 
 		var clientOptions = {
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'b99',
 			'pass': 'bourbon'
@@ -324,10 +334,10 @@ describe('directories', function()
 		})
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(origList).toEqual(cwdList)
 			done()
-		}, 40)
+		}, 80)
 	})
 
 	it ('should allow cwd out of initial directory for admin', function(done)
@@ -336,7 +346,7 @@ describe('directories', function()
 			cwdList
 
 		var clientOptions = {
-			'host': '127.0.0.1',
+			'host': config.host,
 			'port': 7002,
 			'user': 'ingenuity',
 			'pass': 'ingenuity'
@@ -372,10 +382,10 @@ describe('directories', function()
 		})
 		setTimeout(function()
 		{
-			console.log('Waiting 40ms')
+			console.log('Waiting 80ms')
 			expect(origList).toNotEqual(cwdList)
 			done()
-		}, 40)
+		}, 80)
 	})
 	afterEach(function()
 	{
@@ -390,13 +400,13 @@ describe('add users', function()
 	var cloudFTP, client1, client2, server, success1, success2
 
 	var clientOptions1 = {
-		'host': '127.0.0.1',
+		'host': config.host,
 		'port': 7002,
 		'user': 'b99',
 		'pass': 'bourbon'
 	}
 	var clientOptions2 = {
-		'host': '127.0.0.1',
+		'host': config.host,
 		'port': 7002,
 		'user': 'test',
 		'pass': 'test'
@@ -492,7 +502,7 @@ describe('add users', function()
 				fs.writeFileSync(path, newUsersFile)
 				setTimeout(function()
 				{
-					console.log('waiting 10 s')
+					console.log('Waiting 80ms')
 					client2 = new jsftpClient(clientOptions2)
 					client2.auth(clientOptions2.user, clientOptions2.pass, function(err)
 					{
@@ -503,7 +513,7 @@ describe('add users', function()
 						}
 						callback()
 					})
-				}, 40)
+				}, 80)
 			}
 		// This function run after previous two functions complete
 		], function(err)

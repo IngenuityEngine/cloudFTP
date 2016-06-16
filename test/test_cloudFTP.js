@@ -15,8 +15,9 @@ var cOS = require('commonos')
 
 // Set tests root
 var testsRoot = cOS.getDirName(__filename)
+var root = cOS.upADir(testsRoot)
 
-var config = require(cOS.upADir(testsRoot)+ '/config/default.js')
+var config = require(cOS.upADir(testsRoot)+ 'config/default.js')
 
 describe('setup', function()
 {
@@ -31,6 +32,7 @@ describe('setup', function()
 		// Check custom server options
 		var serverOptions =
 		{
+			'root': root + 'test_files',
 			'port': 7020
 		}
 		var server = new cloudFTP(serverOptions)
@@ -67,12 +69,16 @@ describe('authentication', function()
 		'user': 'b99',
 		'pass': 'bourbon'
 	}
+	var serverOptions =
+	{
+		'root': root + 'test_files'
+	}
 
 	cloudFTP = require('../cloudFTP')
 
 	beforeEach(function(done)
 	{
-		server = new cloudFTP()
+		server = new cloudFTP(serverOptions)
 		done()
 	})
 
@@ -129,11 +135,6 @@ describe('root, port, address', function()
 	var cloudFTP, client, server
 	cloudFTP = require('../cloudFTP')
 
-	// beforeEach(function(done)
-	// {
-	// 	done()
-	// })
-
 	it ('should emit error for no root', function(done)
 	{
 		var serverOptions = {
@@ -177,7 +178,11 @@ describe('root, port, address', function()
 			'user': 'b99',
 			'pass': 'bourbon'
 		}
-		server = new cloudFTP()
+		var serverOptions =
+		{
+			'root': root + 'test_files'
+		}
+		server = new cloudFTP(serverOptions)
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, clientOptions.pass, function(err)
 		{
@@ -195,7 +200,7 @@ describe('root, port, address', function()
 		{
 			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
-			expect(userRoot).toEqual(server.options.root + '/' + clientOptions.user)
+			expect(userRoot).toEqual(serverOptions.root + '/' + clientOptions.user)
 			client.raw.quit()
 			server.close()
 			done()
@@ -211,7 +216,12 @@ describe('root, port, address', function()
 			'user': 'ingenuity',
 			'pass': 'ingenuity'
 		}
-		server = new cloudFTP()
+		var serverOptions =
+		{
+			'root': root + 'test_files'
+		}
+
+		server = new cloudFTP(serverOptions)
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, clientOptions.pass, function(err)
 		{
@@ -229,25 +239,24 @@ describe('root, port, address', function()
 		{
 			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
-			expect(userRoot).toEqual(server.options.root)
+			expect(userRoot).toEqual(serverOptions.root)
 			client.raw.quit()
 			server.close()
 			done()
 		}, 80)
 	})
 
-	// afterEach(function()
-	// {
-	// 	// Cleanup
-	// 	client.raw.quit()
-	// 	server.close()
-	// })
 })
 
 describe('directories', function()
 {
 	var cloudFTP, client, server
 	cloudFTP = require('../cloudFTP.js')
+
+	var serverOptions =
+	{
+		'root': root + 'test_files'
+	}
 
 	beforeEach(function(done)
 	{
@@ -265,7 +274,7 @@ describe('directories', function()
 			'user': 'b99',
 			'pass': 'bourbon'
 		}
-		server = new cloudFTP()
+		server = new cloudFTP(serverOptions)
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, clientOptions.pass, function(err)
 		{
@@ -313,7 +322,7 @@ describe('directories', function()
 			'pass': 'ingenuity'
 		}
 
-		server = new cloudFTP()
+		server = new cloudFTP(serverOptions)
 		client = new jsftpClient(clientOptions)
 		client.auth(clientOptions.user, clientOptions.pass, function(err)
 		{
@@ -360,24 +369,31 @@ describe('add users', function()
 {
 	var cloudFTP, client1, client2, server, success1, success2
 
-	var clientOptions1 = {
+	var clientOptions1 =
+	{
 		'host': config.host,
 		'port': 7002,
 		'user': 'b99',
 		'pass': 'bourbon'
 	}
-	var clientOptions2 = {
+	var clientOptions2 =
+	{
 		'host': config.host,
 		'port': 7002,
 		'user': 'test',
 		'pass': 'test'
 	}
 
+	var defaultOptions =
+	{
+		'root': root + 'test_files'
+	}
+
 	cloudFTP = require('../cloudFTP.js')
 
 	it ('server should reject a new user that has not been added', function(done)
 	{
-		server = new cloudFTP()
+		server = new cloudFTP(defaultOptions)
 
 		success1 = true
 		success2 = true
@@ -430,6 +446,7 @@ describe('add users', function()
 	it ('server should update with added user while running', function(done)
 	{
 		var serverOptions = {
+			'root': root + 'test_files',
 			'timeout': 10
 		}
 		server = new cloudFTP(serverOptions)

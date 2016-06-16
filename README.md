@@ -59,14 +59,9 @@ set debug =
 
 ###Running and Debugging on Linux Instance
 * After following set up instructions (https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup), note changes
-* Must run tests with sudo, added to package.json:
-```
-"test:" "mocha ./test/test_cloudFTP.js"
-```
-* So, to run tests, run:
-```sudo npm test```
+* To run tests, run:
+```npm test```
 * On Linux (Google Instance), to run with debug, run
-
 ```
 DEBUG=cloudFTP node cloudFTP.js
 ```

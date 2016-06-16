@@ -30,6 +30,8 @@ var options =
 	host: config.host,
 	port: config.port,
 	root: config.root,
+	pasvStart: config.pasvPortRangeStart,
+	pasvEnd: config.pasvPortRangeEnd,
 	timeout: config.timeout,
 }
 var username
@@ -67,8 +69,8 @@ init: function(custom)
 		{
 			self.getRoot(connection, callback)
 		},
-		pasvPortRangeStart:10090,
-		pasvPortRangeEnd: 10100
+		pasvPortRangeStart: this.customOptions.pasvStart,
+		pasvPortRangeEnd: this.customOptions.pasvEnd
 	})
 	setInterval(function(){
 		self.getUsers(usersPath, function(err, parsed)

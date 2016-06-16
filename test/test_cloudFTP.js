@@ -7,7 +7,6 @@ var beforeEach = global.beforeEach
 var afterEach = global.afterEach
 var expect = require('expect')
 var jsftpClient = require('jsftp')
-var _ = require('lodash')
 var fs = require('fs')
 var async = require('async')
 
@@ -231,44 +230,6 @@ describe('root, port, address', function()
 			console.log('Waiting 80ms')
 			expect(eventFired).toBe(true)
 			expect(userRoot).toEqual(server.options.root)
-			client.raw.quit()
-			server.close()
-			done()
-		}, 80)
-	})
-
-	it ('should emit FTP Server error for invalid port', function(done)
-	{
-		var serverOptions = {
-			'port': 'nonsense'
-		}
-		var clientOptions =
-		{
-			'host': config.host,
-			'port': 7002,
-			'user': 'b99',
-			'pass': 'bourbon'
-		}
-		server = new cloudFTP(serverOptions)
-		client = new jsftpClient(clientOptions)
-		client.auth(clientOptions.user, clientOptions.pass, function(err)
-		{
-			console.log(err)
-		})
-		var eventFired = false
-		var result
-
-		server.on('server error', function(error)
-		{
-			eventFired = true
-			result = error
-		})
-
-		setTimeout(function()
-		{
-			console.log('Waiting 80ms')
-			expect(eventFired).toBe(true)
-			expect(_.toString(result)).toEqual('Error: listen EACCES ' + serverOptions.port)
 			client.raw.quit()
 			server.close()
 			done()

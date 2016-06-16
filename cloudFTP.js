@@ -67,6 +67,8 @@ init: function(custom)
 		{
 			self.getRoot(connection, callback)
 		},
+		pasvPortRangeStart:10090,
+		pasvPortRangeEnd: 10100
 	})
 	setInterval(function(){
 		self.getUsers(usersPath, function(err, parsed)

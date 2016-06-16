@@ -1,5 +1,5 @@
 # cloudFTP
-Simple FTP with OAuth backed by cloud storage.
+Simple FTP backed by cloud storage.
 
 ###Functionality
 * Simple FTP server built on ftpd module
@@ -54,140 +54,25 @@ set debug=*,-mocha*,-connect*,-express*,-stylus*,-send,-session,-compression,-so
 set debug =
 ```
 
-###Installing on Linux (Google Compute Instance)
-* Instructions are specifically for Linux Centos7 instance
-* Log into the instance using instructions here: https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup, as ```web``` admin.
-* See https://github.com/IngenuityEngine/coren/wiki/Environment-Setup
-* Set up enviornment on Linux, and install Node.
-* If you receive "You must be the root to execute command." use ```sudo [COMMAND]```. It will not require a password.
-* First, check that ```yum``` is up to date and has the dependencies needed to compile the source:
-```
-sudo yum update -y
-sudo yum install gcc gcc-c++ automake autoconf libtoolize make wget
-```
-* Next, get the sourcecode using ```wget```, and extract the tar file
-```
-sudo wget http://nodejs.org/dist/v4.4.5/node-v4.4.5.tar.gz
-sudo tar zxvf node-v4.4.5.tar.gz
-```
-* ```cd``` into the extracted directory and run the configure script.
-```
-cd node-v4.4.5
-sudo ./configure
-```
-* Make (this will take a while) and then make install.
-```
-sudo make
-sudo make install
-```
-* After installing, check the version of node and npm
-```
-node -v
-v4.4.5
+###To set up, install, and run CloudFTP on a Google Compute Instance
+* See instructions here: https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup
 
-npm -v
-2.15.5
+###Running and Debugging on Linux Instance
+* After following set up instructions (https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup), note changes
+* Must run tests with sudo, added to package.json:
 ```
-
-Try ```sudo node```. If it says command not found, try creating linked files to resolve the path.
-sudo ln -s /usr/local/bin/node /usr/bin/node
-sudo ln -s /usr/local/bin/npm /usr/bin/npm
-
-* Install ```n``` to handle nodejs versions. ```-g``` flag to install globally
-```sudo npm install -g n n stable```
-
-* Install git
+"test:" "mocha ./test/test_cloudFTP.js"
 ```
-sudo yum install git-all
-```
-
-* Git clone
-sudo git clone https://github.com/IngenuityEngine/cloudFTP.git
-git branch -a
-sudo git checkout [NAME_OF_BRANCH]
-
-* Install mocha
-```
-sudo npm install mocha
-```
-* Install dependencies
-```
-npm install
-```
-
-* Configure firewall for port and ftp
-```
-sudo firewall-cmd --permanent --add-port=7002/tcp
-sudo firewall-cmd --permenent --add-service=ftp
-```
-* View exceptions
-```
-sudo firewall-cmd --permanent --list-all
-```
-* To impelement changes
-```
-sudo firewall-cmd --reload
-```
-* Make sure firewall started at boot
-```
-sudo systemctl enable firewalld
-```
-* See tut: https://www.digitalocean.com/community/tutorials/additional-recommended-steps-for-new-centos-7-servers
-* To fully disable/stop the firewall
-```
-sudo systemctl disable firewalld
-sudo systemctl stop firewalld
-```
-* Check status with
-```
-sudo systemctl status firewalld
-```
-* Ping to test address
-```
-ping 127.0.0.1
-```
-
-* iptables
-* DO NOT RUN, this will disallow connecting to your Google instance
-```
-iptables -F
-```
-* Currently using mongodb config here: https://github.com/IngenuityEngine/coren/wiki/Environment-Setup
+* So, to run tests, run:
+```sudo npm test```
+* On Linux (Google Instance), to run with debug, run
 
 ```
-sudo iptables -I INPUT -p tcp --dport 7002 -s localhost -j ACCEPT
-sudo service iptables save
-sudo service iptables restart
+DEBUG=cloudFTP node cloudFTP.js
 ```
-
-* Allow traffic from instances
-iptables -A INPUT -s 10.132.89.210 -p tcp --destination-port 27017 -m state --state NEW,ESTABLISHED -j ACCEPT
-iptables -A OUTPUT -d 10.132.89.210 -p tcp --source-port 27017 -m state --state ESTABLISHED -j ACCEPT
-* Allow ssh through
- iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
- iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED,RELATED -j ACCEPT
- * Block everything else
-iptables -P INPUT DROP
-iptables -P OUTPUT DROP
-
-https://www.digitalocean.com/community/tutorials/how-to-set-up-a-basic-iptables-firewall-on-centos-6
-Check networking firewall
-
-<!-- * Local host will be the internal ip address listed on google compute instances manager. 10.0.0.3 -->
-
-<!-- npm install git+https://github.com/IngenuityEngine/cloudFTP/tree/develop.git -->
-
-* To check status of port on remote address, install nmap
+* To run without
 ```
-sudo yum install nmap
-```
-* To check specific port
-```
-nmap -p 7002 127.0.0.1
-```
-* To check which ports are listening for TCP connections from the network
-```
-sudo nmap -sT -O localhost
+DEBUG= node cloudFTP.js
 ```
 
 ###To Do
@@ -197,10 +82,3 @@ sudo nmap -sT -O localhost
 * OAuth
 * Run on Google Instance
 * Refer to todo.md
-
-currently commented out root, path section describe.
-
-```
-set in package.json "test:" "mocha ./test/test_cloudFTP.js0"
-sudo npm test
-```

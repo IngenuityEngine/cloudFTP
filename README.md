@@ -19,6 +19,7 @@ Simple FTP backed by cloud storage.
 ```
 
 * Root path set in /config/default.js
+* pasvPortRangeStart and pasvPortRangeEnd set in /config/default.js, the server's port range for passive connections.
 * Authentication username/password pairs set in /config/users.json
 * User/pass pairs are saved in the format:
 ```
@@ -56,6 +57,7 @@ set debug =
 
 ###To set up, install, and run CloudFTP on a Google Compute Instance
 * See instructions here: https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup
+* Current setup: cloudFTP running automatically on ftp001 instance, with ingenuitystudios bucket mounted as a file system within cloudFTP, at /home/web/cloudFTP/files. See full details at: https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup
 
 ###Running and Debugging on Linux Instance
 * After following set up instructions (https://github.com/IngenuityEngine/coren/wiki/Google-Compute-Engine-Setup), note changes

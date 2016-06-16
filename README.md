@@ -71,9 +71,6 @@ DEBUG= node cloudFTP.js
 ```
 
 ###To Do
-* Suppress console.log for successful tests in mocha (reroute console.log to logfile)
 * Extend user authentication to use web database or other system
 * Security using FTPS or TLS
-* OAuth
-* Run on Google Instance
 * Refer to todo.md

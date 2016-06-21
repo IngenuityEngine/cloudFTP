@@ -56,6 +56,7 @@ if(options.key && options.cert)
 		key: readKey,
 		cert: readCert
 	}
+	console.log('Running as FTPS server over TLS')
 }
 else
 {
@@ -71,8 +72,6 @@ else
 		console.log('*** Raw FTP permitted				***')
 	}
 }
-
-
 
 // Main Script
 var cloudFTP = module.exports = base.extend({

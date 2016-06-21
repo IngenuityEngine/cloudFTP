@@ -11,8 +11,8 @@ module.exports = {
 	root: cOS.upADir(root) + 'files',
 	pasvPortRangeStart: 10090,
 	pasvPortRangeEnd: 10100,
-	key: process.env.KEY_FILE || null,
-	cert: process.env.CERT_FILE || null,
+	key: process.env.KEY_FILE || 'test/testKey.key',
+	cert: process.env.CERT_FILE || 'test/testCertificate.crt',
 	// tlsOnly: default false, to permit testing.
 	tlsOnly: false,
 	allowUnauthorizedTls: true,

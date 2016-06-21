@@ -94,6 +94,7 @@ Organizational Unit Name (eg, section) []:.
 Common Name (e.g. server FQDN or YOUR name) []:
 Email Address []:
 ```
+For the client, upon their first connection, they will receive a notification for an unknown certificate, and must approve the information included in our certificate.
 
 Current Setup on Instance
 

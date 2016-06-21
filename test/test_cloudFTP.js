@@ -71,6 +71,7 @@ describe('authentication', function()
 	}
 	var serverOptions =
 	{
+		'port': 7002,
 		'root': root + 'test_files'
 	}
 
@@ -138,6 +139,7 @@ describe('root, port, address', function()
 	it ('should emit error for no root', function(done)
 	{
 		var serverOptions = {
+			'port': 7002,
 			'root': null
 		}
 		var clientOptions =
@@ -180,6 +182,7 @@ describe('root, port, address', function()
 		}
 		var serverOptions =
 		{
+			'port': 7002,
 			'root': root + 'test_files'
 		}
 		server = new cloudFTP(serverOptions)
@@ -218,6 +221,7 @@ describe('root, port, address', function()
 		}
 		var serverOptions =
 		{
+			'port': 7002,
 			'root': root + 'test_files'
 		}
 
@@ -255,6 +259,7 @@ describe('directories', function()
 
 	var serverOptions =
 	{
+		'port': 7002,
 		'root': root + 'test_files'
 	}
 
@@ -386,6 +391,7 @@ describe('add users', function()
 
 	var defaultOptions =
 	{
+		'port': 7002,
 		'root': root + 'test_files'
 	}
 
@@ -446,6 +452,7 @@ describe('add users', function()
 	it ('server should update with added user while running', function(done)
 	{
 		var serverOptions = {
+			'port': 7002,
 			'root': root + 'test_files',
 			'timeout': 10
 		}

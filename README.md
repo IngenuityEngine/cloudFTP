@@ -46,11 +46,11 @@ mocha test_cloudFTP
 ```
 
 ###Debugging
-* To suppress debugging console logs, run
+* To enable debugging console logs:
 ```
 set debug=*,-mocha*,-connect*,-express*,-stylus*,-send,-session,-compression,-socket*,-engine*,-superagent*,-body-parser*
 ```
-* To allow debugging console logs
+* To suppress:
 ```
 set debug =
 ```
@@ -74,5 +74,4 @@ DEBUG= node cloudFTP.js
 
 ###To Do
 * Extend user authentication to use web database or other system
-* Security using FTPS or TLS
 * Refer to todo.md

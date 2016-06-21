@@ -1,4 +1,5 @@
 // Basic server implementation using ftpd node module
+/*jshint latedef: nofunc */
 
 // Vendor Modules
 var ftpd = require('ftpd')
@@ -21,7 +22,7 @@ var usersPath = projectRoot + 'config/users.json'
 
 var users
 // Initial read must by synchronous, so file is fully read before init is called
-var usersFile = fs.readFileSync(usersPath, 'utf8')
+var usersFile = safeReadFileSync(usersPath, 'utf8', 'usersFile')
 users = arkUtil.parseJSON(usersFile)
 
 // Constants, populated from config file
@@ -32,9 +33,46 @@ var options =
 	root: config.root,
 	pasvStart: config.pasvPortRangeStart,
 	pasvEnd: config.pasvPortRangeEnd,
+	key: config.key,
+	cert: config.cert,
+	tlsOnly: config.tlsOnly,
+	allowUnauthorizedTls: config.allowUnauthorizedTls,
 	timeout: config.timeout,
+	tls: null
 }
 var username
+
+// If key and cert specified in config or env vars, read
+if(options.key && options.cert)
+{
+	// Read key and cert
+	var keyPath = projectRoot + options.key
+	var certPath = projectRoot + options.cert
+	var readKey = safeReadFileSync(keyPath, null, 'readKey')
+	var readCert = safeReadFileSync(certPath, null, 'readCert')
+
+	options.tls =
+	{
+		key: readKey,
+		cert: readCert
+	}
+}
+else
+{
+	console.log('\n*** To run as FTPS server over TLS,		***')
+	console.log('*** set "KEY_FILE", "CERT_FILE" env vars.	***')
+	console.log('*** Or, set key and cert in config.		***')
+	if (options.tlsOnly)
+	{
+		console.log('*** FTPS over TLS required			***')
+	}
+	else
+	{
+		console.log('*** Raw FTP permitted				***')
+	}
+}
+
+
 
 // Main Script
 var cloudFTP = module.exports = base.extend({
@@ -70,7 +108,12 @@ init: function(custom)
 			self.getRoot(connection, callback)
 		},
 		pasvPortRangeStart: this.customOptions.pasvStart,
-		pasvPortRangeEnd: this.customOptions.pasvEnd
+		pasvPortRangeEnd: this.customOptions.pasvEnd,
+		tlsOptions: this.customOptions.tls,
+		tlsOnly: this.customOptions.tlsOnly,
+		// If false, server will reject any connection that is not pre-authorized
+		// with list of supplied CAs (two way TLS, not needed here)
+		allowUnauthorizedTls: this.customOptions.allowUnauthorizedTls
 	})
 	setInterval(function(){
 		self.getUsers(usersPath, function(err, parsed)
@@ -311,6 +354,29 @@ close: function()
 
 // End of module
 })
+
+// safeReadFileSync
+// Helper function outside of cloudFTP module to
+// open a filepath with readFileSync, handling errors
+// such as ENOENT if the file does not exist at the path
+// Inputs: path - filepath to read;
+// options - options for readFileSync
+// description - string identifing for example the calling function
+// Outputs: returns readFile, writes error to console
+// Note: can return null
+function safeReadFileSync(path, options, description)
+{
+	var readFile
+	try
+	{
+		readFile = fs.readFileSync(path, options)
+	}
+	catch (err)
+	{
+		debug('readFileSync error for ' + description + ':', err)
+	}
+	return readFile
+}
 
 // If script is not loaded by another script, run itself
 if (!module.parent)

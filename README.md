@@ -75,3 +75,34 @@ DEBUG= node cloudFTP.js
 ###To Do
 * Extend user authentication to use web database or other system
 * Refer to todo.md
+
+###Generate TLS key-cert pairs
+For one-way FTPS over TLS, only server needs to generate key-cert pair.
+
+* To generate key-cert pair:
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout privatekey.key -out certificate.crt
+```
+
+* This will create a 2048 bit RSA private key, and public certificate, valid for 365 days. It will prompt you to fill out the following information:
+```
+Country Name (2 letter code) [AU]:
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+Organizational Unit Name (eg, section) []:.
+Common Name (e.g. server FQDN or YOUR name) []:
+Email Address []:
+```
+
+Current Setup on Instance
+
+* On instance, cloudFTP living at /home/web/cloudFTP
+* Running and managing this program is done as user web
+* When bucket ingenuitystudios unmounted, /home/web/cloudFTP/files is an empty directory
+* When mounted, /home/web/cloudFTP/files is populated with the user folders.
+* Tests run with a separate set of directories, /home/web/cloudFTP/test_files
+* REALLY IMPORTANT: If you recursively delete a directory that has ingenuitystudios mounted on files, it will delete the contents of your bucket. Always double check that ingenuitystudios is unmounted before doing anything major.
+* Server running in the background using systemd service, cloudFTP. Listening on port 7000, using ports within the range 10090-10100 to initiate passive connections. These settings can be changed in config/default.js.
+* See full documentation: https://github.com/IngenuityEngine/coren/wiki/Install-and-Run-Node-App-on-Instance
+

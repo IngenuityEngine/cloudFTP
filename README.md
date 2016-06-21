@@ -32,7 +32,7 @@ Simple FTP backed by cloud storage.
 * "name" field is simply used for documentation purposes. "username" and "password" used by user when launching a client
 * Upon connection, if username found in config with matching password, server will enter that directory as the root
 * If directory corresponding to valid username does not exist yet, server will make and enter the directory
-* User cnanot escape their root directory. Admin account 'ingenuity' can access all subdirectories in /files
+* User cannot escape their root directory. Admin account 'ingenuity' can access all subdirectories in /files
 * User base in CloudFTP updates everytime the /config/users.json file is modified.
 
 ###Testing
@@ -44,6 +44,7 @@ mocha test
 ```
 mocha test_cloudFTP
 ```
+**Make sure tlsOnly in default.js is set to FALSE when testing**
 
 ###Debugging
 * To enable debugging console logs:

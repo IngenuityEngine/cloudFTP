@@ -73,10 +73,6 @@ DEBUG=cloudFTP node cloudFTP.js
 DEBUG= node cloudFTP.js
 ```
 
-###To Do
-* Extend user authentication to use web database or other system
-* Refer to todo.md
-
 ###Generate TLS key-cert pairs
 For one-way FTPS over TLS, only server needs to generate key-cert pair.
 
@@ -106,5 +102,9 @@ Current Setup on Instance
 * Tests run with a separate set of directories, /home/web/cloudFTP/test_files
 * REALLY IMPORTANT: If you recursively delete a directory that has ingenuitystudios mounted on files, it will delete the contents of your bucket. Always double check that ingenuitystudios is unmounted before doing anything major.
 * Server running in the background using systemd service, cloudFTP. Listening on port 7000, using ports within the range 10090-10100 to initiate passive connections. These settings can be changed in config/default.js.
+* Note: on instance, the host in config/default.js must be the explicit IP address of the instance (8.34.213.164). Will not resolve for all clients if localhost or 127.0.0.1 is used.
 * See full documentation: https://github.com/IngenuityEngine/coren/wiki/Install-and-Run-Node-App-on-Instance
 
+###To Do
+* Extend user authentication to use web database or other system
+* Refer to todo.md
